@@ -1,0 +1,44 @@
+<apex:page controller="ClassForAssessment">
+    <apex:form id="pageForm">
+        <apex:pageBlock id="pageblock">
+        <apex:pageBlock id="object_page">
+            <apex:pageBlockSection >
+                <apex:selectList value="{!selectedSobject}" size="1">
+                    <h1>Select Object: </h1><apex:selectOptions value="{!objectOptions}"/>
+                    <apex:actionSupport action="{!resetBtn}" event="onchange" reRender="pageblock" />
+                </apex:selectList>
+                <apex:commandButton value="Reset" disabled="{!show}" action="{!defaultNone}" reRender="pageblock"/>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+        <apex:pageBlock id="field_page" rendered="{!fieldPage}">
+            <apex:pageBlockSection columns="4">
+            <apex:pageBlockSection columns="1">
+                <h1> {!fieldLabel}: Fields </h1>
+                <apex:selectList size="10" multiselect="true" value="{!selectedFieldsForAdd}" style="height:300px;width:300px">
+                    <apex:selectOptions value="{!sortFieldValues}" />
+                </apex:selectList>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection columns="1">
+                <apex:commandButton value="Add" action="{!addFields}" reRender="pageblock" disabled="{!addBtnDisable}"/>
+                <apex:commandButton value="Remove" action="{!removeFields}" reRender="pageblock" disabled="{!removeBtnDisable}"/>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection columns="1">
+                <h1> Selected: Fields </h1>
+                <apex:selectList size="10" multiselect="true" value="{!selectedFieldsForRemove}" style="height:300px;width:300px">
+                    <apex:selectOptions value="{!fieldlst}" />
+                </apex:selectList>  
+            </apex:pageBlockSection>
+            <apex:pageBlockSection columns="1">
+                <apex:commandButton value="Process" action="{!ProcessBtn}" disabled="{!processBtnDisable}" reRender="pageblock"/>
+            </apex:pageBlockSection>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+        <apex:pageBlock id="records_page">
+            <apex:pageBlockSection>
+                <apex:dataTable value="{!fetchRecords}" var="records">
+                </apex:dataTable>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+    </apex:pageBlock>
+    </apex:form>
+</apex:page>
