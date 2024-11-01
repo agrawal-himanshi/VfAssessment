@@ -33,7 +33,7 @@
         
             <main class="slds-size_5-of-6 slds-p-around_small" style="flex-grow: 1;">
                 <div class="slds-grid slds-wrap slds-grid_align-spread" style="margin-bottom: 10px;">
-                    <template if:true={recordsPresent}>
+                    <!-- <template if:true={recordsPresent}> -->
                         <div class="slds-col slds-size_11-of-12">
                             <lightning-card class="card">
                                 <lightning-breadcrumbs class="slds-m-around_small">
@@ -49,7 +49,7 @@
                                 <lightning-menu-item label="Upload Folder" value="uploadFolder"></lightning-menu-item>
                             </lightning-button-menu>
                         </div>
-                    </template>
+                    <!-- </template> -->
                 </div>
         
                 <!-- <template if:true={recordsPresent}>
@@ -102,57 +102,6 @@
             </main>
         </div>
 
-        <template if:true={createFolderModal}>
-            <lightning-modal 
-                header="Create a Folder" 
-                onclose={hideCreateFolderModal}>
-                <lightning-input 
-                    name="foldername" 
-                    required 
-                    value={newFolderName} 
-                    label="Enter Folder Name" 
-                    maxlength="100">
-                </lightning-input>
-                <lightning-modal-footer>
-                    <lightning-button 
-                        variant="neutral" 
-                        label="Cancel" 
-                        onclick={hideCreateFolderModal}>
-                    </lightning-button>
-                    <lightning-button 
-                        variant="brand" 
-                        label="Create Folder" 
-                        onclick={createFolder}>
-                    </lightning-button>
-                </lightning-modal-footer>
-            </lightning-modal>
-        </template>
         
-        <template if:true={uploadFolderModal}>
-            <lightning-modal 
-                header="Upload a File" 
-                onclose={hideUploadFolderModal}>
-                <div class="slds-modal__content slds-p-around_medium">
-                    <lightning-input 
-                        type="file" 
-                        label="Upload File" 
-                        onchange={onUpload}>
-                    </lightning-input>
-                    <span style="margin-top:10px; font-weight:bold;">{fileName}</span>
-                </div>
-                <lightning-modal-footer>
-                    <lightning-button 
-                        variant="neutral" 
-                        label="Cancel" 
-                        onclick={hideUploadFolderModal}>
-                    </lightning-button>
-                    <lightning-button 
-                        variant="brand" 
-                        label="Upload File" 
-                        onclick={uploadFile}>
-                    </lightning-button>
-                </lightning-modal-footer>
-            </lightning-modal>
-        </template>
-</div>
-</template>        
+    </div>
+</template>      

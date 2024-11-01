@@ -2,7 +2,7 @@ import { LightningElement, track } from 'lwc';
 import driveIcon from '@salesforce/resourceUrl/driveIcon';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
-export default class googleDriveIntegrationHomePage extends LightningElement {
+export default class DriveIntegration extends LightningElement {
     myCustomIconUrl = driveIcon;
 
     @track isSidebarExpanded = true;
@@ -123,4 +123,3 @@ export default class googleDriveIntegrationHomePage extends LightningElement {
         // Implement path handling logic (e.g., navigating back)
     }
 }
-
