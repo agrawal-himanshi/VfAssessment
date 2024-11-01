@@ -61,7 +61,7 @@
                     <!-- Connect button -->
                     <lightning:button label="Connect" variant="Neutral" class="slds-m-right_x-small"  disabled="{!(v.isConnected)}" onclick="{!c.doAuth}"/>
                     <!-- Revoke button -->
-                    <lightning:button label="Revoke" variant="Neutral" class="slds-m-right_x-small" disabled="{!(v.isConnected)}" onclick="{!c.doRevoke}"/>
+                    <lightning:button label="Revoke" variant="Neutral" class="slds-m-right_x-small" disabled="{!not(v.isConnected)}" onclick="{!c.doRevoke}"/>
                 </div>
             </div>
         </div>

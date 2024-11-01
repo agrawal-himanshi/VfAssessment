@@ -1,0 +1,182 @@
+<template>
+    <div class="slds-grid slds-wrap slds-grid_align-spread main-content">
+        <header class="slds-grid slds-size_1-of-1 header">
+            <div class="slds-col slds-size_1-of-2 slds-text-align_left header-left">
+                <div class="slds-grid slds-grid_vertical-align-center">
+                    <lightning-icon icon-name="standard:drive" title="files"></lightning-icon>
+                    <h1 class="slds-text-heading_bold header-title">Drive Files</h1>
+                </div>
+            </div>
+            <div class="slds-grid slds-grid_vertical-align-center right-section">
+                <lightning-button-menu alternative-text="Settings Menu" icon-name="utility:setup" icon-size="medium" onselect={handleMenuSelect}>
+                    <lightning-menu-item label="Settings" value="settings"></lightning-menu-item>
+                    <lightning-menu-item label="Logout" value="logout"></lightning-menu-item>
+                </lightning-button-menu>
+                <lightning-icon icon-name="utility:notification" variant="border-filled" size="small" class="slds-m-left_x-small">
+                </lightning-icon>
+                <lightning-icon icon-name="utility:user" variant="border-filled" size="small" class="slds-m-left_x-small" onclick={viewUser}>
+                </lightning-icon>
+            </div>
+        </header>
+
+        <div class="slds-grid slds-wrap slds-grid_vertical-align-start" style="flex-grow: 1;">
+            <aside class={sidebarClass}>
+                <div class="slds-grid slds-grid_vertical-align-center" style="justify-content: space-between; border-bottom: 1px solid grey; margin-top:12px;">
+                    <lightning-icon icon-name="utility:assignment" style="margin-top: 20px; margin-bottom: 10px;" onclick={toggleSidebar}></lightning-icon>
+                    <template if:true={isSidebarExpanded}>
+                        <lightning-button-icon icon-name={sidebarToggleIcon} alternative-text="Toggle Sidebar" onclick={toggleSidebar}></lightning-button-icon>
+                    </template>
+                </div>
+                <template if:true={isSidebarExpanded}>
+                    <div class="slds-m-top_small">
+                        <ul class="slds-list_vertical">
+                            <template for:each={resources} for:item="resource">
+                                <li key={resource.name} class="slds-p-vertical_x-small slds-item" style="margin-top:10px;">
+                                    <div class="slds-grid slds-grid_align-spread resource-item" onclick={selectResource} data-selected={resource.selected}>
+                                        <lightning-avatar src={resource.icon} alt={resource.name} class="slds-m-right_x-small" size="x-small"></lightning-avatar>
+                                        <lightning-button variant="base" label={resource.label} class="slds-button_stretch" disabled={resource.disabled}></lightning-button>
+                                    </div>
+                                </li>
+                            </template>
+                        </ul>
+                    </div>
+                </template>
+            </aside>
+
+            <main class="slds-size_5-of-6 slds-p-around_small">
+                <div class="slds-grid slds-wrap slds-grid_align-spread" style="margin-bottom: 10px;">
+                    <div class="slds-col slds-size_2-of-3">
+                        <template if:true={recordsPresent}>
+                            <lightning-card>
+                                <lightning-breadcrumbs class="slds-m-around_small">
+                                    <template for:each={path} for:item="item">
+                                        <lightning-breadcrumb key={item.value} name={item.value} label={item.label} onclick={handlePath}></lightning-breadcrumb>
+                                    </template>
+                                </lightning-breadcrumbs>
+                            </lightning-card>
+                        </template>
+                    </div>
+                    <div class="slds-col slds-size_1-of-3 slds-text-align_right">
+                        <template if:true={userView}>
+                            <!-- User view related actions -->
+                        </template>
+                        <template if:false={userView}>
+                            <lightning-button-menu alternative-text="Add Options" icon-name="utility:add" icon-size="medium" onselect={handleAddSelect}>
+                                <lightning-menu-item label="Create Folder" value="createFolder">
+                                </lightning-menu-item>
+                                <lightning-menu-item label="Upload Folder" value="uploadFolder">
+                                </lightning-menu-item>
+                            </lightning-button-menu>
+                        </template>
+                    </div>
+                </div>
+                <div class="slds-grid slds-grid_vertical-align-center slds-align_absolute-center" style="height: 100%;">
+                    <template if:false={recordsPresent}>
+                        <lightning-button label="Connect" onclick={doAuth}>
+                        </lightning-button>
+                    </template>
+                </div>
+                <!-- <template if:true={recordsPresent}>
+                    <template if:true={folderAndFile.length === 0}>
+                        <div class="slds-grid slds-grid_align-center slds-grid_vertical-align-center">
+                            <span style="font-size:2rem;">No Files Found</span>
+                        </div>
+                    </template>
+                    <template if:true={folderAndFile.length > 0}>
+                        <div style="overflow: scroll; height:550px;">
+                            <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-scrollable_x">
+                                <thead>
+                                    <tr class="slds-text-heading--label">
+                                        <th scope="col" style="width: 50px;"></th>
+                                        <th scope="col" style="width: 50%;"><div class="slds-truncate">File/Folder</div></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={folderAndFile} for:item="record">
+                                        <tr key={record.fileId} class="slds-hint-parent" data-id={record.fileId} data-name={record.fileName} data-type={record.fileType} data-path={record.pathDisplay}>
+                                            <td data-label="" style="width: 50px;">
+                                                <template if:true={record.isFolder}>
+                                                    <lightning-icon icon-name="doctype:folder"></lightning-icon>
+                                                </template>
+                                                <template if:false={record.isFolder}>
+                                                    <lightning-icon icon-name={"doctype:" + record.fileType}></lightning-icon>
+                                                </template>
+                                            </td>
+                                            <td data-label="Name" style="width: 50%;">
+                                                <template if:true={record.isFolder}>
+                                                    <a class="slds-truncate" title={record.fileName} onclick={openFolder} data-path={record.pathDisplay} style="font-size: 14px;">{record.fileName}</a>
+                                                </template>
+                                                <template if:false={record.isFolder}>
+                                                    <a class="slds-truncate slds-m-right_small" title="preview" onclick={previewFile} style="font-size: 14px;">{record.fileName}</a>
+                                                </template>
+                                            </td>
+                                            <td class="slds-text-align_center" data-label="Download" style="width: 150px;">
+                                                <lightning-button-group>
+                                                    <lightning-button label="Download" class="slds-truncate slds-m-right_small" title="Download" onclick={downloadFile}></lightning-button>
+                                                    <lightning-button label="Delete" class="slds-truncate" title="Delete" onclick={deleteFile}></lightning-button>
+                                                </lightning-button-group>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </template>
+                </template> -->
+            </main>
+        </div>
+
+        <template if:true={createFolderModal}>
+            <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header">
+                        <lightning-button-icon icon-name="utility:close" onclick={hideCreateFolderModal} alternative-text="close" variant="bare-inverse" class="slds-modal__close"></lightning-button-icon>
+                        <h2 class="slds-text-heading_medium slds-hyphenate">Create a Folder</h2>
+                    </header>
+                    <lightning-modal-body>
+                        <lightning-input name="foldername" required="true" value={newFolderName} label="Enter Folder Name" maxlength="100"></lightning-input>
+                    </lightning-modal-body>
+                    <lightning-modal-footer>
+                        <lightning-button variant="neutral" label="Cancel" onclick={hideCreateFolderModal}></lightning-button>
+                        <lightning-button variant="brand" label="Create Folder" onclick={createFolder}></lightning-button>
+                    </lightning-modal-footer>
+                </div>
+            </section>
+        </template>
+
+<!-- <template>
+    <lightning-modal-header label="My Modal Heading"></lightning-modal-header>
+    <lightning-modal-body>
+      Let's make some buttons! <br />
+      <template for:each={options} for:item="option">
+        <lightning-button
+          onclick={handleOptionClick}
+          data-id={option.id}
+          key={option.id}
+          label={option.label}
+        >
+        </lightning-button>
+      </template>
+    </lightning-modal-body>
+  </template> -->
+  
+        <template if:true={uploadFolderModal}>
+            <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header">
+                        <lightning-button-icon icon-name="utility:close" onclick={hideUploadFolderModal} alternative-text="close" variant="bare-inverse" class="slds-modal__close"></lightning-button-icon>
+                        <h2 class="slds-text-heading_medium slds-hyphenate">Upload a File</h2>
+                    </header>
+                    <div class="slds-modal__content slds-p-around_medium">
+                        <lightning-input type="file" label="Upload File" onchange={onUpload}></lightning-input>
+                        <span style="margin-top:10px; font-weight:bold;">{fileName}</span>
+                    </div>
+                    <footer class="slds-modal__footer">
+                        <lightning-button variant="neutral" label="Cancel" onclick={hideUploadFolderModal}></lightning-button>
+                        <lightning-button variant="brand" label="Upload File" onclick={uploadFile}></lightning-button>
+                    </footer>
+                </div>
+            </section>
+        </template>
+    </div>
+</template>

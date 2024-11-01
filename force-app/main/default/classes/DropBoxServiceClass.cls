@@ -22,13 +22,11 @@ public class DropBoxServiceClass {
         bodyRequest+= '&client_secret=' + EncodingUtil.urlEncode(clientSecret, 'UTF-8');
         bodyRequest+= '&redirect_uri=' + EncodingUtil.urlEncode(redirectUri, 'UTF-8');
         bodyRequest+= '&grant_type=authorization_code';
-            
         req.setBody(bodyRequest);    
         req.setHeader('Content-length', string.ValueOf(bodyRequest.length()));
         req.setHeader('Content-Type', 'application/x-www-form-urlencoded');
         req.setMethod('POST');
         req.setTimeout(60*1000);
-            
         HttpResponse res = h.send(req);
         return new IntegrationWrapperClass(res.getBody(),String.valueof(res.getStatusCode()));
     }

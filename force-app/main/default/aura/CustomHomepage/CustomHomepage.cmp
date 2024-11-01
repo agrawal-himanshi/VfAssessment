@@ -12,7 +12,7 @@
     <aura:attribute name="uploadFolderModal" type="Boolean" default="false"/>
     <aura:attribute name="newFolderName" type="String" />
     <aura:attribute name="recordsPresent" type="Boolean" default="false"/>
-    <aura:attribute name="path" type="List" default="[{label:'Home/', value:'root'}]"/>
+    <aura:attribute name="path" type="List" default="[{label:'Home', value:'root'}]"/>
     <aura:attribute name="fileName" type="String" default=""/>
     <aura:attribute name="fileContent" type="Object"/>
     <aura:attribute name="userView" type="Boolean" default="false"/>
@@ -97,7 +97,7 @@
                             <lightning:card>
                                 <lightning:breadcrumbs class="slds-m-around_small">
                                         <aura:iteration items="{!v.path}" var="item">
-                                            <lightning:breadcrumb class="slds-text-heading_small" name="{!item.value}" label="{!item.label}" onclick="{!c.handlePath}"  style="color: white;"/>
+                                            <lightning:breadcrumb class="slds-text-heading_small" name="{!item.value}" label="{!item.label}" onclick="{!c.handlePath}"/>
                                         </aura:iteration>    
                                 </lightning:breadcrumbs>
                             </lightning:card>
@@ -163,7 +163,7 @@
                                                 <aura:if isTrue="{!record.fileType=='folder'}">
                                                     <a class="slds-truncate" title="{!record.fileName}" onclick="{!c.openFolder}" data-path="{!record.pathDisplay}" style="font-size: 14px;">{!record.fileName}</a>
                                                     <aura:set attribute="else">
-                                                        <a class="slds-truncate slds-m-right_small" title="preview"  onclick="{!c.perviewFile}"  style="font-size: 14px;">
+                                                        <a class="slds-truncate slds-m-right_small" title="preview" onclick="{!c.perviewFile}"  style="font-size: 14px;">
                                                             {!record.fileName}
                                                         </a>
                                                     </aura:set>

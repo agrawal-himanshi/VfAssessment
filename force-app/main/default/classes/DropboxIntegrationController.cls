@@ -26,16 +26,15 @@ public with sharing class DropboxIntegrationController {
                 aura.redirect(uri);
                 system.debug(uri);
                 return new List<DropboxFile>();
-            }
-            if (tokens!= null) {
-                data = getFileAndFolders(tokens.Access_Token__c, currentFolder, false);
-                return data; // Return the data if tokens are valid
-            }            
+            }           
             if(tokens.Expire_In_Time__c < System.now()){
                 Map<string, string> jsonValues = accessTokenWithRefreshToken(dropBox.AppKey__c,dropBox.AppSecret__c,tokens.Refresh_Token__c);
                 data = getFileAndFolders(jsonValues.get('access_token'),currentFolder,true);
                 saveToken(jsonValues.get('access_token'),jsonValues.get('refresh_token'),jsonValues.get('expires_in'));
             }
+            if (tokens!= null) {
+                data = getFileAndFolders(tokens.Access_Token__c, currentFolder, false);
+            } 
             return data;
         } 
         catch (Exception e) {
@@ -202,13 +201,8 @@ public with sharing class DropboxIntegrationController {
             response = DropBoxServiceClass.revokeAccessToken(accessToken);
             System.debug(response.responseStatusCode);
             if (response.responseStatusCode == '200') { 
-                try {
-                    // Query and delete the associated Integration_Access__c record if it exists
-                    Integration_Access__c accessRecord = [SELECT Id FROM Integration_Access__c WHERE Access_Token__c = :accessToken LIMIT 1];
-                    delete accessRecord;
-                } catch (Exception e) {
-                    System.debug('No record found for the access token: ' + e.getMessage());
-                }
+                Integration_Access__c accessRecord = [SELECT Id FROM Integration_Access__c WHERE Access_Token__c = :accessToken LIMIT 1];
+                delete accessRecord;
                 return redirectUri;
             } else {
                 return 'Failed to revoke access token: ' + response.responseBody;
@@ -310,7 +304,6 @@ public with sharing class DropboxIntegrationController {
                 System.debug(response);
             }
             System.debug(response.responseStatusCode);
-            
             if(response.responseStatusCode=='200'){
                 Map<String, Object> responseMap = (Map<String, Object>) JSON.deserializeUntyped(response.responseBody);
                 String url = (String) responseMap.get('link');
