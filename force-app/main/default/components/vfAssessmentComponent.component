@@ -1,0 +1,57 @@
+<apex:component controller="vfAssessmentComponentClass">
+  	<apex:attribute name="selectedobject" type="String" description="selected object" assignTo="{!selectedSobject}"/>  
+    <apex:attribute name="selectedFields" type="String[]" description="List to store Fields name" assignTo="{!fieldOption}"/>
+    <apex:actionFunction name="recordsMethod" action="{!recordsMethod}" reRender="recordpage"/>
+    <apex:pageBlock id="recordpage">
+        <apex:commandButton value="NewRecord" />
+        <apex:commandButton value="Delete Selected"/>
+        <apex:commandButton value="Download CSV"/>
+        <apex:outputLink> A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z | Others | ALL </apex:outputLink>
+        <div style="overflow:scroll;width:100%;height:150px">
+            <apex:pageBlockTable value="{!recordQuery}" var="record">
+                <apex:column>
+                    <apex:facet name="header">
+                        <apex:inputCheckbox value="{!masterCheckBox}"/>
+                    </apex:facet>
+                    <apex:inputCheckbox/>
+                </apex:column>
+                <apex:column>
+                    <apex:facet name="header">
+                        <apex:outputText value="Actions"/>
+                    </apex:facet>
+                    <apex:outputLink accesskey="Edit">Edit</apex:outputLink>
+                </apex:column>
+                <apex:repeat value="{!fieldsCopy}" var="fieldLabel">
+                    <apex:column value="{!record.obj[fieldLabel]}"/>
+                </apex:repeat>
+            </apex:pageBlockTable>
+        </div>
+        <div>
+            <div>
+                <apex:selectList value="{!size}" size="1">
+                    <apex:selectOptions value="{!paginationSizeOptions}"/>
+                    <apex:actionSupport event="onchange" action="{!refreshPageSize}"/>
+                </apex:selectList>
+            </div>
+            <center>
+            <div >
+                <apex:commandButton status="pageStatus" reRender="recordpage" value="First" action="{!firstBtn}" disabled="{!!setCon.hasPrevious}"/> 
+                <apex:commandButton status="pageStatus" reRender="recordpage" value="Previous" action="{!previousBtn}" disabled="{!!setCon.hasPrevious}"/> 
+                <apex:commandButton status="pageStatus" reRender="recordpage" value="Next" action="{!nextBtn}" disabled="{!!setCon.hasNext}"/> 
+                <apex:commandButton status="pageStatus" reRender="recordpage" value="Last" action="{!lastBtn}" disabled="{!!setCon.hasNext}"/> 
+            </div>
+            </center>
+                Page: <apex:outputText />{!setcon.pageNumber} of {!CEILING(setcon.resultSize / size)}
+        </div>
+    </apex:pageBlock>
+</apex:component>
+
+
+<!-- <apex:pageBlock title="WrapperClass">
+                <apex:pageBlockTable value="{!Record}" var="list">
+                    <apex:column headerValue="Select Record">
+                        <apex:inputCheckbox value="{!list.MyCheck}"/>
+                    </apex:column>
+                </apex:pageBlockTable>
+            <apex:commandButton action="{!SelectedRecord}" value="Get Selected" reRender="SelectList"/>
+        </apex:pageBlock> -->

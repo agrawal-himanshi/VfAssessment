@@ -1,0 +1,25 @@
+<apex:page tabStyle="Account" controller="AccountController">
+    <apex:form >
+    	<apex:pageBlock >
+            <apex:pageMessages />
+            
+            <apex:pageBlockButtons >
+        		<!--apex:commandButton action="{!save}" value="Save"/>
+                <apex:commandButton action="{!quickSave}" value="Quick Save" reRender="page"/>
+                <apex:commandButton action="{!edit}" value="Edit" reRender="page"/>
+                <apex:commandButton action="{!deletion}" value="Delete"/>
+                <apex:commandButton action="{!cancel}" value="Cancel"/-->
+            </apex:pageBlockButtons>
+             <apex:pageBlockSection id="page">
+             
+                 <!--apex:outputField value="{!acc.Name}" rendered="{!NOT(Edit)}"/>
+                 <apex:inputField value="{!acc.Name}" rendered="{!Edit}"/>
+                 <apex:outputField value="{!acc.Industry}" rendered="{!NOT(Edit)}"/>
+                 <apex:inputField value="{!acc.Industry}" rendered="{!Edit}"/>
+                 <apex:outputField value="{!acc.Rating}" rendered="{!NOT(Edit)}"/>
+                 <apex:inputField value="{!acc.Rating}" rendered="{!Edit}"/>
+                 <apex:outputField value="{!acc.Id}"/-->
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

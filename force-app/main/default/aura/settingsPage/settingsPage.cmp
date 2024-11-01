@@ -1,0 +1,136 @@
+<aura:component controller="DropboxIntegrationController" implements="forceCommunity:availableForAllPageTypes" access="global">
+    <aura:attribute name="accessToken" type="String" />
+    <aura:attribute name="files" type="object" />
+    <aura:attribute name="isConnected" type="Boolean" default="false" />
+    
+    <div class="slds-grid slds-wrap slds-grid_align-spread" style="background-color: #f7f7f5; background-image: linear-gradient(to bottom, #f7f7f5, #f2f2f2); padding: 20px; height:100svh">
+        <div class="slds-grid slds-size_1-of-1" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid grey; margin-bottom: 10px; padding-bottom: 10px;">
+            <div class="slds-col slds-size_1-of-2 slds-text-align_left">
+                <!-- Left-aligned section -->
+                <div class="slds-grid slds-grid_vertical-align-center">
+                    <lightning:icon iconName="utility:home" title="home" onclick="{!c.navigateToHomePage}" style="cursor: pointer;"/>
+                    <h1 class="slds-text-heading_bold" style="margin-left: 10px;">Settings</h1>
+                </div>
+            </div>
+            <div class="slds-grid slds-grid_vertical-align-center right-section">
+                <lightning:buttonMenu alternativeText="Settings Menu" iconName="utility:setup" iconSize="medium" menuAlignment="right" onselect="{!c.handleMenuSelect}">
+                    <lightning:menuItem label="Settings" value="settings"/>
+                    <lightning:menuItem label="Logout" value="logout"/>
+                </lightning:buttonMenu>
+                <div class="slds-icon_container slds-icon-utility-notification slds-m-left_x-small slds-icon_container_circle">
+                    <lightning:icon iconName="utility:notification" variant="border-filled" size="small"/>
+                </div>
+                <div class="avatar-circle slds-m-left_x-small">
+                    <lightning:icon iconName="utility:user" variant="border-filled" size="small" class="slds-icon_container_circle"/>
+                </div>
+            </div>
+        </div>
+        
+        <div class="slds-grid slds-size_1-of-1 slds-p-horizontal_medium" style="margin-top: 50px; margin-bottom: 10px; padding-bottom: 10px; font-size: 20px;">
+            <!-- Left section with Google Drive icon and text -->
+            <div class="slds-col slds-size_1-of-2 slds-text-align_left">
+                <div class="slds-grid slds-grid_vertical-align-center">
+                    <lightning:avatar src="{!$Resource.GoogleDriveIcon}" alt="" class="slds-m-right-small" style="margin-top:5px; border-radius:15px" />
+                    <span class="slds-m-left_x-small" style="margin-left: 10px;">Google Drive</span>
+                </div>
+            </div>
+            
+            <!-- Right section with Connect and Revoke buttons -->
+            <div class="slds-col slds-size_1-of-2 slds-text-align_right">
+                <div class="slds-grid slds-grid_vertical-align-right right-section">
+                    <!-- Connect button -->
+                    <lightning:button label="Connect" variant="Neutral" class="slds-m-right_x-small" disabled="true" onclick="{!c.doAuth}" />
+                    <!-- Revoke button -->
+                    <lightning:button label="Revoke" variant="Neutral" disabled="true" onclick="{!c.doRevoke}"/>
+                </div>
+            </div>
+        </div>
+        
+        <div class="slds-grid slds-size_1-of-1 slds-p-horizontal_medium" style="margin-top: 10px; margin-bottom: 10px; padding-bottom: 10px; font-size: 20px;">
+            <!-- Left section with DropBox icon and text -->
+            <div class="slds-col slds-size_1-of-2 slds-text-align_left">
+                <div class="slds-grid slds-grid_vertical-align-center">
+                    <lightning:avatar src="{!$Resource.DropBoxIcon}" alt="" class="slds-m-right-small" style="margin-top:5px; border-radius:15px" />
+                    <span class="slds-m-left_x-small" style="margin-left: 10px;">DropBox</span>
+                </div>
+            </div>
+            
+            <!-- Right section with Connect and Revoke buttons -->
+            <div class="slds-col slds-size_1-of-2 slds-text-align_right">
+                <div class="slds-grid slds-grid_vertical-align-right right-section">
+                    <!-- Connect button -->
+                    <lightning:button label="Connect" variant="Neutral" class="slds-m-right_x-small"  disabled="{!(v.isConnected)}" onclick="{!c.doAuth}"/>
+                    <!-- Revoke button -->
+                    <lightning:button label="Revoke" variant="Neutral" class="slds-m-right_x-small" disabled="{!(v.isConnected)}" onclick="{!c.doRevoke}"/>
+                </div>
+            </div>
+        </div>
+        
+        <div class="slds-grid slds-size_1-of-1 slds-p-horizontal_medium" style="margin-top: 10px; margin-bottom: 10px; padding-bottom: 10px; font-size: 20px;">
+            <!-- Left section with Box icon and text -->
+            <div class="slds-col slds-size_1-of-2 slds-text-align_left">
+                <div class="slds-grid slds-grid_vertical-align-center">
+                    <lightning:avatar src="{!$Resource.BoxIcon}" alt="" class="slds-m-right-small" style="margin-top:5px; border-radius:15px" />
+                    <span class="slds-m-left_x-small" style="margin-left: 10px;">Box</span>
+                </div>
+            </div>
+            
+            <!-- Right section with Connect and Revoke buttons -->
+            <div class="slds-col slds-size_1-of-2 slds-text-align_right">
+                <div class="slds-grid slds-grid_vertical-align-right right-section">
+                    <!-- Connect button -->
+                    <lightning:button label="Connect" variant="Neutral" class="slds-m-right_x-small" disabled="true" onclick="{!c.doAuth}" />
+                    <!-- Revoke button -->
+                    <lightning:button label="Revoke" variant="Neutral" disabled="true" onclick="{!c.doRevoke}"/>
+                </div>
+            </div>
+        </div>
+        
+        <div class="slds-grid slds-size_1-of-1 slds-p-horizontal_medium" style="margin-top: 10px; margin-bottom: 10px; padding-bottom: 10px; font-size: 20px;">
+            <!-- Left section with Salesforce icon and text -->
+            <div class="slds-col slds-size_1-of-2 slds-text-align_left">
+                <div class="slds-grid slds-grid_vertical-align-center">
+                    <lightning:avatar src="{!$Resource.SalesforceIcon}" alt="" class="slds-m-right-small" style="margin-top:5px; border-radius:15px" />
+                    <span class="slds-m-left_x-small" style="margin-left: 10px;">Salesforce</span>
+                </div>
+            </div>
+            
+            <!-- Right section with Connect and Revoke buttons -->
+            <div class="slds-col slds-size_1-of-2 slds-text-align_right">
+                <div class="slds-grid slds-grid_vertical-align-right right-section">
+                    <!-- Connect button -->
+                    <lightning:button label="Connect" variant="Neutral" class="slds-m-right_x-small" disabled="true" onclick="{!c.doAuth}" />
+                    <!-- Revoke button -->
+                    <lightning:button label="Revoke" variant="Neutral" disabled="true" onclick="{!c.doRevoke}"/>
+                </div>
+            </div>
+        </div>
+        
+        <div class="slds-grid slds-size_1-of-1 slds-p-horizontal_medium" style="margin-top: 30px; margin-bottom: 10px; padding-bottom: 10px; font-size: 20px;">
+            <!-- Left section with Default View text -->
+            <div class="slds-col slds-size_1-of-2 slds-text-align_left">
+                <div class="slds-grid slds-grid_vertical-align-center">
+                    <span class="slds-m-left_x-small"  style="margin-top:5px;">Default View</span>
+                </div>
+            </div>
+            
+            <!-- Right section with Select and Save button -->
+            <div class="slds-col slds-size_1-of-2 slds-text-align_right" style="display: flex; align-items: center;">
+                <div class="slds-form-element custom-select slds-m-right_x-small">
+                    <div class="slds-form-element__control slds-grow">
+                        <div class="slds-select_container" style="margin-top:5px;">
+                            <select aria-invalid="false" class="slds-select" name="select1">
+                                <option value="1">DropBox</option>
+                                <option value="5" disabled="true">All Files</option>
+                                <option value="2" disabled="true">Google Drive</option>
+                                <option value="3" disabled="true">Box</option>
+                                <option value="4" disabled="true">Salesforce</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <lightning:button label="Save" variant="Neutral" class="custom-button"/>
+            </div>
+        </div>
+    </div>
+</aura:component>

@@ -1,0 +1,52 @@
+.THIS .sidebar {
+    transition: width 0.3s ease-in-out;
+}
+
+.THIS .expanded {
+    width: 15%; 
+}
+
+.THIS .collapsed {
+    width: 35px; /* Adjust as needed for your design */
+}
+
+.THIS .avatar-circle {
+    cursor: pointer; 
+}
+
+.THIS.main-content {
+    background-color: #f7f7f5;
+    padding: 20px;
+    height: 100svh; 
+}
+
+/* Header Styles */
+.THIS  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid grey;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    max-height: 100svh; /* Use '100vh' if '100svh' is not supported */
+}
+
+.THIS .header-left {
+    margin-bottom: 0;
+}
+
+.THIS .header-title {
+    margin-left: 5px;
+}
+
+
+.THIS.resource-item {
+    cursor: pointer;
+    padding: 5px; 
+}
+
+.THIS.resource-item[data-selected='true'] {
+    background-color: blue; 
+}
+
+

@@ -1,0 +1,27 @@
+<apex:page standardController="Account" recordSetVar="Accounts">
+    <apex:form >
+    	<apex:pageBlock >
+            <apex:pageMessages />
+            
+            <apex:pageBlockButtons >
+        		<apex:commandButton action="{!Save}" value="Save"/>
+                <apex:commandButton action="{!Save}" value="Quick Save"/>
+                <apex:commandButton action="{!Save}" value="Edit"/>
+            </apex:pageBlockButtons>
+        	<apex:pageBlockTable value="{!Accounts}" var="list">
+                <apex:column > 
+                        <apex:inputField value="{!list.Name}"/>  
+                </apex:column>
+                <apex:column > 
+                        <apex:inputField value="{!list.Industry}"/>  
+                </apex:column>
+                <apex:column > 
+                        <apex:inputField value="{!list.Rating}"/>  
+                </apex:column>
+                <apex:column > 
+                        <apex:inputField value="{!list.Id}"/>  
+                </apex:column>
+            </apex:pageBlockTable>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

@@ -1,0 +1,111 @@
+<apex:Page standardController="Job_Application__c">
+    <apex:pageBlock title="owner">
+        <apex:pageBlockSection title="Owner Detail">
+            <p>
+                Job Application Detail is-(Owner): {!Job_Application__c.Owner.Name}
+            </p>
+        </apex:pageBlockSection>
+    </apex:pageBlock>
+    <apex:pageBlock title="Job Application">
+        <apex:pageBlockSection title="Record Detail">
+            <p>Job Application Detail is-(Name): {!Job_Application__c.Name}</p>
+        	<p>Job Application Detail is-(Total Rating):{!Job_Application__c.Total_Rating__c}</p>
+        	<p>Job Application Detail is-(Number of Revier):{!Job_Application__c.Number_Of_Reviews__c}</p>
+        	<p>Job Application Detail is-(Avarage Rating): {!Job_Application__c.Average_Rating__c}</p>
+        	<p>Job Application Detail is-(Status): {!Job_Application__c.Status__c}</p>
+        </apex:pageBlockSection>
+    </apex:pageBlock>
+    <apex:pageBlock title="Master Object">
+        <apex:pageBlockSection title="Candidate Object Detail">
+            <p>Job Application Detail is-(Master Candidate-Name): {!Job_Application__c.Candidate__r.Name}</p>
+        	<p>Job Application Detail is-(Master Candidate-City): {!Job_Application__c.Candidate__r.City__c}</p>
+        	<p>Job Application Detail is-(Master Candidate-Country):{!Job_Application__c.Candidate__r.Country__c}</p>
+   			<p>Job Application Detail is-(Master Candidate-Email):{!Job_Application__c.Candidate__r.Email__c}</p>
+        	<p>Job Application Detail is-(Master Candidate-First Name):{!Job_Application__c.Candidate__r.First_Name__c}</p>
+        	<p>Job Application Detail is-(Master Candidate-First Name):{!Job_Application__c.Candidate__r.Last_Name__c}</p>
+        </apex:pageBlockSection>
+        <apex:pageBlockSection title="Position Object Detail">
+            <p>Job Application Detail is-(Master Position-Open Date):{!Job_Application__c.Position__r.Open_Date__c}</p>
+        	<p>Job Application Detail is-(Master Position-Close Date):{!Job_Application__c.Position__r.Close_Date__c}</p>
+        	<p>Job Application Detail is-(Master Position-Hire By):{!Job_Application__c.Position__r.Hire_By__c}</p>
+        	<p>Job Application Detail is-(Master Position-Hire By):{!Job_Application__c.Position__r.Min_Pay__c}</p>
+        	<p>Job Application Detail is-(Master Position-Hire By):{!Job_Application__c.Position__r.Max_Pay__c}</p>
+        </apex:pageBlockSection>
+    </apex:pageBlock>
+</apex:Page>
+
+
+
+
+<!-- <apex:page StandardController="Merchandise__c" recordSetVar="Record" >
+   <!-- <apex:form >
+        <apex:pageBlock title="Merchandise">
+            <apex:pageMessages />
+            <apex:pageBlockButtons >
+                <apex:commandButton action="{!Save}" value="save"/>
+                <apex:commandButton action="{!Cancel}" value="cancel"/>
+            </apex:pageBlockButtons>
+            
+            <apex:pageBlockSection title="Create record">
+				<apex:inputField value="{!Merchandise__c.Name}"/>  
+                <apex:inputField value="{!Merchandise__c.Job_Description__c}"/>
+                <apex:inputField value="{!Merchandise__c.Price__c}"/>
+                <apex:inputField value="{!Merchandise__c.Total_Inventory__c}"/>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+    </apex:form> -->
+	<!-- <apex:form>    
+    	<apex:pageBlock title="Merchandise">
+            <apex:pageBlockButtons>
+                <apex:commandButton action="{!Save}" value="Update Inventory"/>
+                <apex:commandButton action="{!Cancel}" value="Cancel"/>
+            </apex:pageBlockButtons>
+            <apex:pageBlockSection title="Record List">
+                <apex:pageBlockTable value="{!record}" var="item">
+                    <apex:column value="{!item.Name}"/>
+                    <apex:column value="{!item.Job_Description__c}"/>
+                    <apex:column value="{!item.Price__c}"/>
+                    <apex:column headerValue="Change Inventory">
+                        <apex:inputText value="{!item.Total_Inventory__c}"/>
+                    </apex:column>
+            </apex:pageBlockTable>
+            </apex:pageBlockSection>
+    	</apex:pageBlock>
+	 </apex:form>
+	-->
+    
+  <!--  <apex:pageBlock title="Merchandise">
+        <apex:form >
+            <apex:dataList value="{!Record}" var="list">
+                <apex:commandLink rerender="detail">
+                    {!list.Name}
+                    <apex:param name="cid" value="{!list.id}"/>
+                </apex:commandLink>
+            </apex:dataList>
+        </apex:form>
+    </apex:pageBlock>
+    
+    <apex:pageBlock title="Record Detil">
+        <apex:outputPanel id="detail">
+            <apex:detail subject="{!$CurrentPage.parameters.cid}" relatedList="false" title="false"/>
+        </apex:outputPanel>
+    </apex:pageBlock>
+</apex:page>
+-->
+<!--
+<apex:page standardController="Position__c">
+    <apex:pageBlock title="Position Record">
+        <apex:pageBlockSection >
+            <apex:form>
+                Name: <apex:inputField value="{!Position__c.Name}"/><br/>
+                Min Pay: <apex:inputField value="{!Position__c.Min_Pay__c}"/><br/>
+                Max Pay:<apex:inputField value="{!Position__c.Max_Pay__c}"/><br/>
+                Status: <apex:inputField value="{!Position__c.Status__c}"/><br/>
+                Type: <apex:inputField value="{!Position__c.Type__c}"/><br/>
+                Open Date: <apex:inputField value="{!Position__c.Open_Date__c}"/>
+                <apex:commandButton action="{!Save}" value="Save"/>
+            </apex:form>
+        </apex:pageBlockSection>
+    </apex:pageBlock>
+</apex:page>
+-->

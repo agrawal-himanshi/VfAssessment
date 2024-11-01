@@ -1,0 +1,31 @@
+<!--
+    Component Name : CustomLoginForm 
+    Description  : aura component for Custom community login page
+    Created Date   : /05/2024 
+    Name    : Himanshi Agrawal  
+-->
+<aura:component controller="LoginController" implements="forceCommunity:availableForAllPageTypes" access="global" >
+    <aura:attribute name="startUrl" type="String" default="https://briskmindssoftwaresoluti-6b-dev-ed.develop.my.site.com/dropboxCommunity/s/"/>
+    <lightning:card>
+        <lightning:layout multipleRows="true">
+            <lightning:layoutitem size ="12" padding="around-small">
+                <lightning:input type="text" label ="UserName" placeholder="Username" aura:id="username" required="true">
+                </lightning:input>
+            </lightning:layoutitem> 
+            <lightning:layoutitem size ="12" padding="around-small">
+                <lightning:input type="password" label ="Password" placeholder="Password" aura:id="password" required="true">
+                </lightning:input>
+            </lightning:layoutitem>
+            <lightning:layoutitem size ="12" padding="around-small">
+                <div class="slds-align_absolute-center">
+                    <lightning:button label="Login" variant="brand" onclick="{!c.onLogin}"/>
+                </div>
+            </lightning:layoutitem>
+            <lightning:layoutitem size ="12" padding="around-small">
+                <div class="slds-align_absolute-center slds-float_right">
+                    <a href="https://briskmindssoftwaresoluti-6b-dev-ed.develop.my.site.com/dropboxCommunity/s/" onclick="{!c.onForgotPassword}">Forgot Password?</a>
+                </div>
+            </lightning:layoutitem>
+        </lightning:layout>
+    </lightning:card>
+</aura:component>

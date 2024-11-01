@@ -1,0 +1,251 @@
+<!--
+    Component Name : CustomHomepage 
+    Description  : aura component for Home page of community site
+    Created Date   : 
+    Name    : Himanshi Agrawal   
+-->
+
+<aura:component controller="DropboxIntegrationController" implements="forceCommunity:availableForAllPageTypes" access="global" >    
+    <aura:attribute name="isSidebarExpanded" type="Boolean" default="true"/>
+    <aura:attribute name="folderAndFile" type="List"/>
+    <aura:attribute name="createFolderModal" type="Boolean" default="false"/>
+    <aura:attribute name="uploadFolderModal" type="Boolean" default="false"/>
+    <aura:attribute name="newFolderName" type="String" />
+    <aura:attribute name="recordsPresent" type="Boolean" default="false"/>
+    <aura:attribute name="path" type="List" default="[{label:'Home/', value:'root'}]"/>
+    <aura:attribute name="fileName" type="String" default=""/>
+    <aura:attribute name="fileContent" type="Object"/>
+    <aura:attribute name="userView" type="Boolean" default="false"/>
+
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
+
+    <div class="slds-grid slds-wrap slds-grid_align-spread main-content">
+        <div class="slds-grid slds-size_1-of-1 header" >
+            <div class="slds-col slds-size_1-of-2 slds-text-align_left header-left">
+                <!-- Left-aligned section -->
+                <div class="slds-grid slds-grid_vertical-align-center">
+                    <lightning:icon iconName="standard:file" title="files" />
+                    <h1 class="slds-text-heading_bold header-title" >File Manager</h1>
+                </div>
+            </div>
+            <div class="slds-grid slds-grid_vertical-align-center right-section">
+                <lightning:buttonMenu alternativeText="Settings Menu" iconName="utility:setup" iconSize="medium" menuAlignment="right" onselect="{!c.handleMenuSelect}">
+                    <lightning:menuItem label="Settings" value="settings"/>
+                    <lightning:menuItem label="Logout" value="logout"/>
+                </lightning:buttonMenu>                
+                <div class="slds-icon_container slds-icon-utility-notification slds-m-left_x-small slds-icon_container_circle">
+                    <lightning:icon iconName="utility:notification" variant="border-filled" size="small"/>
+                </div>
+                <div class="avatar-circle slds-m-left_x-small">
+                    <lightning:icon iconName="utility:user" variant="border-filled" size="small" class="slds-icon_container_circle" onclick="{!c.viewUser}"/>
+                </div>        
+            </div>
+        </div>        
+        
+        <!-- Sidebar and Main Content -->
+        <div class="slds-grid slds-wrap slds-grid_vertical-align-start " style="flex-grow: 1;">
+            <!-- Sidebar -->
+            <div class="{!'sidebar ' + (v.isSidebarExpanded ? 'expanded' : 'collapsed')}" style="border-right: 1px solid grey; overflow-x: hidden; height: calc(100svh - 81px);">
+                <div class="slds-grid slds-grid_vertical-align-center" style="justify-content: space-between; border-bottom: 1px solid grey; margin-top:12px;">
+                    <lightning:icon iconName="utility:assignment" style="margin-top: 20px; margin-bottom: 10px;" onclick="{!c.toggleSidebar}"></lightning:icon>
+                    <aura:if isTrue="{!v.isSidebarExpanded}">
+                        <lightning:buttonIcon iconName="{!v.isSidebarExpanded ? 'utility:chevrondown' : 'utility:chevronright'}" alternativeText="Toggle Sidebar" onclick="{!c.toggleSidebar}"/>
+                    </aura:if>                  
+                </div>
+                <aura:if isTrue="{!v.isSidebarExpanded}">
+                    <div class="slds-m-top_small">
+                        <div class="slds-grid slds-wrap">
+                            <div class="slds-col slds-size_1-of-2">
+                                <ul class="slds-list_vertical">
+                                    <li class="slds-p-vertical_x-small slds-item" style="margin-top:10px;">
+                                        <div class="slds-grid slds-grid_align-spread resource-item" data-selected="{!v.selectedResource == 'Google Drive'}" onclick="{!c.selectResource}">
+                                            <lightning:avatar src="{!$Resource.GoogleDriveIcon}" alt="Google Drive" class="slds-m-right_x-small" size="x-small"/>
+                                            <lightning:button variant="base" label="Google Drive" class="slds-button_stretch" disabled="true"/>
+                                        </div>
+                                    </li>
+                                    <li class="slds-p-vertical_x-small slds-item" style="margin-top:12px;">
+                                        <div class="slds-grid slds-grid_align-spread resource-item" data-selected="{!v.selectedResource == 'Dropbox'}" onclick="{!c.selectResource}">
+                                            <lightning:avatar src="{!$Resource.DropBoxIcon}" alt="Dropbox" class="slds-m-right_x-small" size="x-small"/>
+                                            <lightning:button variant="base" label="Dropbox" class="slds-button_stretch"/>
+                                        </div>
+                                    </li>
+                                    <li class="slds-p-vertical_x-small slds-item" style="margin-top:8px;">
+                                        <div class="slds-grid slds-grid_align-spread resource-item" data-selected="{!v.selectedResource == 'Box'}" onclick="{!c.selectResource}">
+                                            <lightning:avatar src="{!$Resource.BoxIcon}" alt="Box" class="slds-m-right_x-small" size="x-small"/>
+                                            <lightning:button variant="base" label="Box" class="slds-button_stretch" disabled="true"/>
+                                        </div>
+                                    </li>
+                                    <li class="slds-p-vertical_x-small slds-item" style="margin-top:10px;">
+                                        <div class="slds-grid slds-grid_align-spread resource-item" data-selected="{!v.selectedResource == 'Salesforce'}" onclick="{!c.selectResource}">
+                                            <lightning:avatar src="{!$Resource.SalesforceIcon}" alt="Salesforce" class="slds-m-right_x-small" size="x-small"/>
+                                            <lightning:button variant="base" label="Salesforce" class="slds-button_stretch" disabled="true"/>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </aura:if>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="slds-size_5-of-6 slds-p-around_small">
+                <div class="slds-grid slds-wrap slds-grid_align-spread" style="margin-bottom: 10px;">
+                    <div class="slds-col slds-size_2-of-3">
+                        <!-- Breadcrumb in a box -->
+                        <aura:if isTrue="{!v.recordsPresent}">
+                            <lightning:card>
+                                <lightning:breadcrumbs class="slds-m-around_small">
+                                        <aura:iteration items="{!v.path}" var="item">
+                                            <lightning:breadcrumb class="slds-text-heading_small" name="{!item.value}" label="{!item.label}" onclick="{!c.handlePath}"  style="color: white;"/>
+                                        </aura:iteration>    
+                                </lightning:breadcrumbs>
+                            </lightning:card>
+                        </aura:if> 
+                    </div>
+                    <aura:if isTrue="{!v.userView}">
+                        
+                    </aura:if>
+                    <aura:if isTrue="{!not(v.userView)}">
+                        <div class="slds-col slds-size_1-of-3 slds-text-align_right">
+                            <lightning:buttonMenu alternativeText="Add Options" iconName="utility:add" iconSize="medium" menuAlignment="right" onselect="{!c.handleAddSelect}">
+                                <lightning:menuItem label="Create Folder" value="createFolder"/>
+                                <lightning:menuItem label="Upload Folder" value="uploadFolder"/>
+                            </lightning:buttonMenu>
+                        </div>
+                    </aura:if>
+                </div>
+                <div class="slds-grid slds-grid_vertical-align-center slds-align_absolute-center" style="height: 100%;">
+                <!-- Main file/folder content will be rendered here -->
+                    <aura:if isTrue="{!not(v.recordsPresent)}">
+                        <lightning:button label="Connect" onclick="{!c.doAuth}" />
+                    </aura:if>
+                </div>
+                <div>
+                    <aura:if isTrue="{!v.recordsPresent}">
+                        <aura:if isTrue="{!v.folderAndFile.length == 0}" >
+                            <div class="slds-grid slds-grid_align-center slds-grid_vertical-align-center">
+                                    <span style="font-size:2rem;"> 
+                                        No Files Found
+                                    </span>
+                            </div>
+                        </aura:if>
+                    </aura:if>
+                    <aura:if isTrue="{!v.folderAndFile.length > 0}" >
+                        <div style="overflow: scroll; height:550px;">
+                            <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-scrollable_x">
+                                <thead>
+                                    <tr class="slds-text-heading--label" >
+                                        <th scope="col" style="width: 50px;">
+                                        </th>
+                                        <th scope="col" style="width: 50%;"   >
+                                            <div class="slds-truncate">File/Folder</div>
+                                        </th>
+                                        
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <aura:iteration items="{!v.folderAndFile}" var="record">
+                                        <tr class="slds-hint-parent" data-id="{!record.fileId}" data-name="{!record.fileName}" data-type="{!record.fileType}" data-path="{!record.pathDisplay}">
+                                            <td data-label="" style="width: 50px;">
+                                                <aura:if isTrue="{!record.fileType=='folder'}">
+                                                    <div class="slds-truncate" title="icon">
+                                                        <lightning:icon iconName="doctype:folder" />
+                                                    </div>
+                                                    <aura:set attribute="else">
+                                                        <div class="slds-truncate" title="icon">
+                                                            <lightning:icon iconName="{! 'doctype:' + record.fileType }" />
+                                                        </div>
+                                                    </aura:set>
+                                                </aura:if>
+                                            </td>
+                                            <td data-label="Name" style="width: 50%;">
+                                                <aura:if isTrue="{!record.fileType=='folder'}">
+                                                    <a class="slds-truncate" title="{!record.fileName}" onclick="{!c.openFolder}" data-path="{!record.pathDisplay}" style="font-size: 14px;">{!record.fileName}</a>
+                                                    <aura:set attribute="else">
+                                                        <a class="slds-truncate slds-m-right_small" title="preview"  onclick="{!c.perviewFile}"  style="font-size: 14px;">
+                                                            {!record.fileName}
+                                                        </a>
+                                                    </aura:set>
+                                                </aura:if>
+                                            </td>
+                                            <td class="slds-text-align_center" data-label="Download" style="width: 150px;">
+                                                <lightning:buttonGroup>
+                                                    <lightning:button label="Download" class="slds-truncate slds-m-right_small" title="Download" onclick="{!c.downloadFile}"></lightning:button>
+                                                    <lightning:button label="Delete" class="slds-truncate" title="Delete" onclick="{!c.deleteFile}"></lightning:button>
+                                                </lightning:buttonGroup>
+                                            </td>
+                                        </tr>
+                                    </aura:iteration>
+                                </tbody>
+                            </table>
+                        </div>
+                    </aura:if>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <aura:if isTrue="{!v.createFolderModal}">
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <lightning:buttonIcon iconName="utility:close"
+                                        onclick="{!c.hideCreateFolderModal}"
+                                        alternativeText="close"
+                                        variant="bare-inverse"
+                                        class="slds-modal__close"/>
+                    <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Create a Folder</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                    <lightning:input name="foldername" required="true" value="{!v.newFolderName}" label="Enter Folder Name" maxlength="100" />
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning:button variant="neutral"
+                                    label="Cancel"
+                                    title="Cancel"
+                                    onclick="{!c.hideCreateFolderModal}"/>
+                    <lightning:button variant="brand"
+                                    label="Create Folder"
+                                    title="Create Folder"
+                                    onclick="{!c.createfolder}"/>
+                </footer>
+            </div>
+        </section>
+    </aura:if>
+
+    <aura:if isTrue="{!v.uploadFolderModal}">
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <lightning:buttonIcon iconName="utility:close"
+                                          onclick="{!c.hideUploadFolderModal}"
+                                          alternativeText="close"
+                                          variant="bare-inverse"
+                                          class="slds-modal__close"/>
+                    <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Upload a File</h2>
+                </header>
+                <div style="display: flex;background-color:white;">
+                    <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                        <lightning:input type="file" name="file" label="Upload File" onchange="{!c.onUpload}" />
+                    </div>
+                    <div class="slds-p-around_small slds-m-around_small" style="display: flex; justify-content: center;align-items: end;">
+                        <span style="margin-top:10px ; font-weight:bold;">
+                            {!v.fileName}
+                        </span>
+                    </div>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning:button variant="neutral"
+                                      label="Cancel"
+                                      title="Cancel"
+                                      onclick="{!c.hideUploadFolderModal}"/>
+                    <lightning:button variant="brand"
+                                      label="Upload File"
+                                      title="Upload File"
+                                      onclick="{!c.uploadFolder}"/>
+                </footer>
+            </div>
+        </section>
+    </aura:if>
+</aura:component>

@@ -1,0 +1,21 @@
+<apex:page standardController="Account">
+    <apex:form >
+    	<apex:pageBlock >
+            <apex:pageMessages />
+            
+            <apex:pageBlockButtons >
+        		<apex:commandButton action="{!Save}" value="Save"/>
+                <apex:commandButton action="{!QuickSave}" value="Quick Save"/>
+                <apex:commandButton action="{!Save}" value="Edit" />
+                <apex:commandButton action="{!Save}" value="Delete"/>
+                <apex:commandButton action="{!Cancel}" value="Cancel"/>
+            </apex:pageBlockButtons>
+        	<apex:pageBlockSection >
+                <apex:inputField value="{! Account.Name}"/> <br/>
+                <apex:inputField value="{! Account.Industry}"/> <br/>
+                <apex:inputField value="{! Account.Rating}"/> <br/>
+                <apex:inputField value="{! Account.Id} "/> <br/>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>
