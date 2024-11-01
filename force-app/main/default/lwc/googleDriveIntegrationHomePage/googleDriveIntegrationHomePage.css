@@ -1,9 +1,8 @@
 .sidebar {
-    border-right: 1px solid grey;
+    border-right: 1px solid black;
     overflow-x: hidden;
     height: calc(100vh - 81px);
 }
-
 
 .expanded {
     width: 15%; 
@@ -14,20 +13,18 @@
 }
 
 .main-content {
-    background-color: #f7f7f5;
+    background-color:rgb(228, 244, 240);
     padding: 20px;
-    height: 100svh; 
+    max-height: 100svh; 
 }
 
-/* Header Styles */
 .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid grey;
+    border-bottom: 1px solid black;
     margin-bottom: 10px;
     padding-bottom: 10px;
-    max-height: 100svh;
 }
 
 .header-left {
@@ -38,12 +35,21 @@
     margin-left: 5px;
 }
 
-
-.resource-item {
-    cursor: pointer;
-    padding: 5px; 
+.google-drive-icon {
+    width: 24px; 
+    height: 24px; 
 }
 
-.resource-item[data-selected='true'] {
-    background-color: blue; 
+.slds-dropdown-trigger {
+    width: 110px; 
+}
+
+.custom-button-container {
+    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+}
+
+.card{
+    height: 50px;
 }
