@@ -10,8 +10,8 @@ export default class googleDriveIntegrationHomePage extends LightningElement {
     @track createFolderModal = false;
     @track uploadFolderModal = false;
     @track newFolderName = '';
-    @track recordsPresent = false; // Change this to true if you have records
-    @track path = [{ label: 'Home/', value: 'root' }];
+    @track recordsPresent = false;
+    @track path = [{ label: 'Home', value: 'root' }];
     @track fileName = '';
     @track fileContent;
     @track selectedResource = '';
