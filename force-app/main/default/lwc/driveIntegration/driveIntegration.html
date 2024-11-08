@@ -1,5 +1,10 @@
 <template>
     <div class="slds-grid slds-wrap slds-grid_align-spread main-content">
+        <template if:true={isLoading}>
+            <div class="slds-spinner_container">
+                <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+            </div>
+        </template>
         <header class="slds-grid slds-size_1-of-1 header">
             <div class="slds-col slds-size_1-of-2 slds-text-align_left header-left">
                 <div class="slds-grid slds-grid_vertical-align-center">
@@ -25,15 +30,37 @@
                     </template>
                 </div>
                 <template if:true={isSidebarExpanded}>
+                    <div style="margin-top: 20px; width: 20px;">
+                        <table class="slds-table slds-table_bordered">
+                            <thead>
+                                <tr class="slds-text-heading--label">
+                                    <th scope="col">
+                                        <div class="slds-truncate" title="User Email">Connected Accounts</div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={ConnectedAccMailIds} for:item="AccMailId">
+                                    <tr key={AccMailId.Id} class="slds-hint-parent">
+                                        <td data-label="User Email">
+                                            <div class="slds-truncate" title={AccMailId.user_mail__c}>
+                                                <a class="slds-truncate" data-email={AccMailId.user_mail__c} onclick={handleEmailClick} >{AccMailId.user_mail__c}</a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
                     <div class="custom-button-container">
-                        <lightning-button label="Add Accounts" onclick={doAuth}></lightning-button>
+                        <lightning-button label="Add Accounts" variant="success" onclick={doAuthOtherAccount}></lightning-button>
                     </div>
                 </template>
             </aside>
         
-            <main class="slds-size_5-of-6 slds-p-around_small" style="flex-grow: 1;">
+            <main class="slds-p-around_small" style="flex-grow: 1;">
                 <div class="slds-grid slds-wrap slds-grid_align-spread" style="margin-bottom: 10px;">
-                    <!-- <template if:true={recordsPresent}> -->
+                    <template if:true={recordsPresent}>
                         <div class="slds-col slds-size_11-of-12">
                             <lightning-card class="card">
                                 <lightning-breadcrumbs class="slds-m-around_small">
@@ -49,19 +76,14 @@
                                 <lightning-menu-item label="Upload Folder" value="uploadFolder"></lightning-menu-item>
                             </lightning-button-menu>
                         </div>
-                    <!-- </template> -->
+                    </template>
                 </div>
         
-                <!-- <template if:true={recordsPresent}>
-                    <template if:true={folderAndFile.length === 0}>
-                        <div class="slds-grid slds-grid_align-center slds-grid_vertical-align-center">
-                            <span style="font-size:2rem;">No Files Found</span>
-                        </div>
-                    </template>
-                    <template if:true={folderAndFile.length > 0}>
+                <template if:true={recordsPresent}>
+                    <template if:true={folderAndFileLength}>
                         <div style="overflow: scroll; height:550px;">
                             <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-scrollable_x">
-                                <thead>
+                                <thead class="custom-thead">
                                     <tr class="slds-text-heading--label">
                                         <th scope="col" style="width: 50px;"></th>
                                         <th scope="col" style="width: 50%;"><div class="slds-truncate">File/Folder</div></th>
@@ -71,25 +93,24 @@
                                     <template for:each={folderAndFile} for:item="record">
                                         <tr key={record.fileId} class="slds-hint-parent" data-id={record.fileId} data-name={record.fileName} data-type={record.fileType} data-path={record.pathDisplay}>
                                             <td data-label="" style="width: 50px;">
-                                                <template if:true={record.isFolder}>
-                                                    <lightning-icon icon-name="doctype:folder"></lightning-icon>
-                                                </template>
-                                                <template if:false={record.isFolder}>
-                                                    <lightning-icon icon-name={"doctype:" + record.fileType}></lightning-icon>
-                                                </template>
+                                                <lightning-icon icon-name={record.iconName}></lightning-icon>
                                             </td>
                                             <td data-label="Name" style="width: 50%;">
                                                 <template if:true={record.isFolder}>
-                                                    <a class="slds-truncate" title={record.fileName} onclick={openFolder} data-path={record.pathDisplay} style="font-size: 14px;">{record.fileName}</a>
+                                                    <a class="slds-truncate" title={record.fileName} data-id={record.fileId} onclick={openFolder} data-path={record.pathDisplay} style="font-size: 14px;">{record.fileName}</a>
                                                 </template>
                                                 <template if:false={record.isFolder}>
-                                                    <a class="slds-truncate slds-m-right_small" title="preview" onclick={previewFile} style="font-size: 14px;">{record.fileName}</a>
+                                                    <a class="slds-truncate slds-m-right_small" title="preview" href={record.previewLink} target="_blank" style="font-size: 14px;">{record.fileName}</a>
                                                 </template>
                                             </td>
-                                            <td class="slds-text-align_center" data-label="Download" style="width: 150px;">
+                                            <td class="slds-text-align_center" data-label="Download" style="width:150px;">
                                                 <lightning-button-group>
-                                                    <lightning-button label="Download" class="slds-truncate slds-m-right_small" title="Download" onclick={downloadFile}></lightning-button>
-                                                    <lightning-button label="Delete" class="slds-truncate" title="Delete" onclick={deleteFile}></lightning-button>
+                                                    <template if:false={record.isFolder}>
+                                                        <a href={record.downloadLink} download>
+                                                            <lightning-button label="Download" class="slds-truncate slds-m-right_small" title="Download"></lightning-button>
+                                                        </a>
+                                                    </template>
+                                                    <lightning-button label="Delete" class="slds-truncate" title="Delete" data-id={record.fileId} data-type={record.isFolder} onclick={deleteFile}></lightning-button>
                                                 </lightning-button-group>
                                             </td>
                                         </tr>
@@ -98,10 +119,75 @@
                             </table>
                         </div>
                     </template>
-                </template> -->
+                    <template if:false={folderAndFileLength}>
+                        <div class="slds-grid slds-grid_align-center slds-grid_vertical-align-center">
+                            <span style="font-size:2rem;">No Files Found</span>
+                        </div>
+                    </template>
+                </template>
             </main>
         </div>
+            
+        <!-- view user details -->
+        <template if:true={viewUserModal}>
+            <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-view-user" aria-modal="true" class="slds-modal slds-fade-in-open">
+                <div class="slds-modal__container" style="margin-left: 700px; margin-top: 100px;">
+                    <header class="slds-modal__header">
+                        <lightning-button-icon icon-name="utility:close" onclick={hideUserModal} alternative-text="close" variant="bare-inverse" class="slds-modal__close">
+                        </lightning-button-icon>
+                        <h2 id="modal-heading-view-user" class="slds-text-heading_medium slds-hyphenate">Current User Details</h2>
+                    </header>
+                    <div class="slds-modal__content slds-p-around_medium">
+                        <h2>UserName: {username}</h2>
+                        <h2>Email Id: {email}</h2>
+                    </div>
+                </div>
+            </section>
+        </template>
 
-        
+        <!-- Create Folder Modal -->
+        <template if:true={createFolderModal}>
+            <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-create-folder" aria-modal="true" class="slds-modal slds-fade-in-open">
+                <div class="slds-modal__container" style="margin-left: 700px; margin-top: 100px;">
+                    <header class="slds-modal__header">
+                        <lightning-button-icon icon-name="utility:close" onclick={hideCreateFolderModal} alternative-text="close" variant="bare-inverse" class="slds-modal__close">
+                        </lightning-button-icon>
+                        <h2 id="modal-heading-create-folder" class="slds-text-heading_medium slds-hyphenate">Create a Folder</h2>
+                    </header>
+                    <div class="slds-modal__content slds-p-around_medium">
+                        <lightning-input name="foldername" required label="Enter Folder Name" maxlength="100" onchange={handleFolderNameChange}>
+                        </lightning-input>
+                    </div>
+                    <footer class="slds-modal__footer">
+                        <lightning-button variant="neutral" label="Cancel" onclick={hideCreateFolderModal}></lightning-button>
+                        <lightning-button variant="brand" label="Create Folder" onclick={createFolder}></lightning-button>
+                    </footer>
+                </div>
+            </section>
+        </template>
+    
+        <!-- Upload File Modal -->
+        <template if:true={uploadFolderModal}>
+            <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-upload-file" aria-modal="true" class="slds-modal slds-fade-in-open">
+                <div class="slds-modal__container" style="margin-left: 700px; margin-top: 100px;">
+                    <header class="slds-modal__header">
+                        <lightning-button-icon icon-name="utility:close" onclick={hideUploadFolderModal} alternative-text="close" variant="bare-inverse" class="slds-modal__close">
+                        </lightning-button-icon>
+                        <h2 id="modal-heading-upload-file" class="slds-text-heading_medium slds-hyphenate">Upload a File</h2>
+                    </header>
+                    <div class="slds-modal__content slds-p-around_medium">
+                        <lightning-input type="file" label="Upload File" onchange={onUpload}></lightning-input>
+                        <span class="uploaded-file-name">{fileName}</span>
+                    </div>
+                    <footer class="slds-modal__footer">
+                        <lightning-button variant="neutral" label="Cancel" onclick={hideUploadFolderModal}></lightning-button>
+                        <lightning-button variant="brand" label="Upload File" onclick={uploadFile}></lightning-button>
+                    </footer>
+                </div>
+            </section>
+        </template>        
     </div>
 </template>      
+
+
+

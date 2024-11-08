@@ -5,7 +5,7 @@
 }
 
 .expanded {
-    width: 15%; 
+    width: 21%; 
 }
 
 .collapsed {
@@ -52,5 +52,57 @@
 
 .card{
     height: 50px;
+}
+
+.slds-modal {
+    max-width: 900px;
+}
+
+.slds-modal__header {
+    background-color: rgb(183, 170, 170); 
+    border-bottom: 1px solid #d8dde6; 
+}
+
+.slds-modal__content {
+    padding: 1rem; 
+    background-color: rgb(183, 170, 170);
+}
+
+.uploaded-file-name {
+    margin-top: 10px;
+    font-weight: bold;
+    display: block; 
+}
+
+.slds-modal__footer lightning-button {
+    margin-left: 0.5rem; 
+}
+
+.custom-thead {
+    background-color: #f4f6f9; 
+    height: 40px; 
+}
+
+.custom-thead th {
+    vertical-align: middle; 
+    padding: 10px; 
+}
+
+.slds-modal__container {
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.slds-modal__footer {
+    background-color: rgb(183, 170, 170); 
+}
+
+.slds-modal__close {                    
+    background-color: rgb(183, 170, 170);
+    color: white;
+}
+
+.selected-email {
+    background-color: rgb(184, 180, 180); 
 }
 
