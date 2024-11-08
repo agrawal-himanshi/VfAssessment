@@ -30,6 +30,7 @@ public with sharing class driveController {
                 Integration_Access__c tokens = getTokens(recordd.user_mail__c); 
                 if (tokens != null) { 
                     uriMap.put('email',emailId);
+                    uriMap.put('haveAccessToken',tokens.Access_Token__c);
                     if (tokens.Expire_In_Time__c < System.now()) { 
                         Map<String, String> jsonValues = accessTokenWithRefreshToken(googleDrive.AppKey__c, googleDrive.AppSecret__c, tokens.Refresh_Token__c, recordd.user_mail__c);
                         if (jsonValues.isEmpty()) {
@@ -246,8 +247,9 @@ public with sharing class driveController {
             IntegrationAssignment__mdt box = getMetaData();
             Integration_Access__c tokens = getTokens(email);
             if(String.isBlank(current) || current == 'root'){
-                current = '0';
+                current = '';
             }
+            // String filePath = current + '/' + fileName;
             if(accessToken == '' || accessToken == null){
                 accessToken = tokens.Access_Token__c;
             }
@@ -255,13 +257,13 @@ public with sharing class driveController {
             if(tokens.Expire_In_Time__c < System.now()){
                 Map<string, string> jsonValues = accessTokenWithRefreshToken(box.AppKey__c, box.AppSecret__c, tokens.Refresh_Token__c,email);
                 accessToken = jsonValues.get('access_token');
-                response = GoogleDriveServiceClass.uploadFile(accessToken, mimeType, fileName, fileContent, current);
+                response = GoogleDriveServiceClass.uploadFile(accessToken, fileName, fileContent, current, mimeType);
                 saveToken(jsonValues.get('access_token'), jsonValues.get('refresh_token'), jsonValues.get('expires_in'),email);
             }
             else{
-                response = GoogleDriveServiceClass.uploadFile(accessToken, mimeType, fileName, fileContent, current);
+                response = GoogleDriveServiceClass.uploadFile(accessToken, fileName, fileContent, current, mimeType);
             }
-            if(response.responseStatusCode == '201'){
+            if(response.responseStatusCode == '200'){
                 return true;
             }
             else if(response.responseStatusCode == '401'){

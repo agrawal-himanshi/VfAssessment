@@ -9,6 +9,7 @@ import deleteFileOrFolder from '@salesforce/apex/driveController.deleteFileOrFol
 import createFolderInGoogleDrive from '@salesforce/apex/driveController.createFolderInGoogleDrive';
 import getAllAccMailIds from '@salesforce/apex/driveController.getAllAccMailIds';
 import uploadFile from '@salesforce/apex/driveController.uploadFile';
+import userDetails from '@salesforce/apex/driveController.userDetails';
 
 export default class DriveIntegration extends LightningElement {
     myCustomIconUrl = driveIcon;
@@ -16,7 +17,7 @@ export default class DriveIntegration extends LightningElement {
     @track isLoading = false;
     @track username;
     @track email;
-    @track accesstoken;
+    @track fetchedAccessToken;
     @track type;
     @track folderAndFileLength;
     @track isSidebarExpanded = true;
@@ -28,8 +29,8 @@ export default class DriveIntegration extends LightningElement {
     @track newFolderName = '';
     @track recordsPresent = false;
     @track path = [{ label: 'Home', value: 'root' }];
-    @track fileName = '';
-    @track fileContent;
+    @track fileNameFromUi = '';
+    @track fileContentFromUi;
     @track folderName;
 
     get sidebarClass() {
@@ -60,6 +61,9 @@ export default class DriveIntegration extends LightningElement {
                     }else if(key == 'authUri'){
                         uri = jsonResponse[key];
                     }
+                    else if(key == 'haveAccessToken'){
+                        this.fetchedAccessToken = jsonResponse[key];
+                    }
                     else{
                         this.email=jsonResponse[key];
                     }
@@ -71,13 +75,26 @@ export default class DriveIntegration extends LightningElement {
                 else{
                     console.log('entered to get files');
                     console.log(this.email);
+                    console.log(this.fetchedAccessToken);
                     this.isLoading=false;
                     this.recordsPresent=true;
+                    this.showCurrentFoldersAndFiles();
                     getAllAccMailIds()
-                    .then(result =>{
+                    .then(result => {
                         this.ConnectedAccMailIds = result;
+                        if (this.ConnectedAccMailIds.length > 0) {
+                            this.email = this.ConnectedAccMailIds[0]; 
+                        }
                     })
-                    this.showCurrentFoldersAndFiles();  
+                    userDetails({accessToken : this.fetchedAccessToken})
+                    .then(user => {
+                        this.username = user.username;
+                        this.email = user.email;
+                        console.log('User details set:', this.username, this.email);
+                    })
+                    .catch(error => {
+                        console.error('Error retrieving user details:', error);
+                    });
                 }
             })      
             .catch(error => {
@@ -95,11 +112,14 @@ export default class DriveIntegration extends LightningElement {
                 console.log(this.username);
                 this.isLoading=false;
                 this.recordsPresent=true;
+                this.showCurrentFoldersAndFiles();
                 getAllAccMailIds()
-                .then(result =>{
+                .then(result => {
                     this.ConnectedAccMailIds = result;
-                })
-                this.showCurrentFoldersAndFiles();  
+                    if (this.ConnectedAccMailIds.length > 0) {
+                        this.email = this.ConnectedAccMailIds[0]; 
+                    }
+                })  
             })            
             .catch(error => {
                 this.isLoading=false;
@@ -152,7 +172,7 @@ export default class DriveIntegration extends LightningElement {
     toggleSidebar() {
         this.isSidebarExpanded = !this.isSidebarExpanded;
     }
-
+  
     handleEmailClick(event) {
         const previouslySelected = this.template.querySelector('.selected-email');
         if (previouslySelected) {
@@ -242,8 +262,6 @@ export default class DriveIntegration extends LightningElement {
 
     hideUploadFolderModal() {
         this.uploadFolderModal = false;
-        this.fileName = ''; 
-        this.fileContent = '';
     }
 
     hideUserModal(){
@@ -254,33 +272,37 @@ export default class DriveIntegration extends LightningElement {
         const file = event.target.files[0];
         console.log(file);
         if (file) {
-            this.fileName = file.name; 
+            this.fileNameFromUi = file.name; 
+            this.type = file.type;
             const reader = new FileReader();
             reader.onload = () => {
-                this.fileContent = reader.result.split(',')[1];
+                this.fileContentFromUi = reader.result.split(',')[1];
+                //console.log(this.fileContentFromUi);
             };
             reader.readAsDataURL(file);
-            this.type = file.type;
         }
-        console.log(this.fileName);
+        console.log(this.fileNameFromUi);
+        // console.log(this.fileContentFromUi);
         console.log(this.type);
     }
-
+    
     uploadFile() {
         const currentFolder = this.path[this.path.length - 1].value;
+        console.log(currentFolder);
         console.log(this.type);
-        if (this.fileContent) {
+        console.log(this.fileContentFromUi);
+        if (this.fileContentFromUi) {
             this.isLoading = true;
-            uploadFile({ accessToken : '', mimeType: this.type, current : currentFolder, fileName : this.fileName,  fileContent : this.fileContent, email: this.email })
+            uploadFile({ accessToken : '', mimeType: this.type, current : currentFolder, fileName : this.fileNameFromUi,  fileContent : this.fileContentFromUi, email: this.email })
             .then(result => {
                 console.log('Hi');
                 console.log(result);
                 //this.showToast('Success', 'File Uploaded Successfully', 'success');
-                this.showCurrentFoldersAndFiles();
-                this.fileName = '';
-                this.fileContent = null;
+                this.fileNameFromUi = '';
+                this.fileContentFromUi = null;
                 this.type = '';
-                this.isLoading = false;   
+                this.isLoading = false; 
+                this.showCurrentFoldersAndFiles();  
                 this.hideUploadFolderModal();            
             })
             .catch(error => {
@@ -360,39 +382,45 @@ export default class DriveIntegration extends LightningElement {
         });
     }
 
-    // handlePath(event) {
-    //     this.loadSpinner = true; 
-    //     const folderPath = event.target.name;
-    //     const index = this.path.findIndex(item => item.value === folderPath);
-    //     if (index === -1 || index === this.path.length - 1) {
-    //         this.loadSpinner = false;
-            
-    //         return;
-    //     }
-    //     getFileANdFolders({accessToken : '', currentFolder : folderPath, isNew : false})
-    //     .then(result=>{
-    //         this.folderAndFile = result;
-    //         if(this.folderAndFile.length > 0){
-    //             this.isEmptyFolderAndFile = false;
-    //         }
-    //         else{
-    //             this.isEmptyFolderAndFile = true;
-    //         }
-    //         const path = this.path.slice(0, index + 1);
-    //         this.path = path;
-    //         this.loadSpinner = false;
-    //     })
-    //     .catch(error => {
-    //         this.loadSpinner = false
-    //         this.showToast('Error', error.body.message, 'error');
-    //     });
-    // }
-
     handlePath(event) {
-        console.log(event);
-        const selectedPath = event.target.dataset.value;
+        const folderPath = event.target.dataset.value;
+        this.isLoading = true; 
+        const index = this.path.findIndex(item => item.value === folderPath);
+        if (index === -1 || index === this.path.length - 1) {
+            this.isLoading = false;
+            return;
+        }
+        getFilesANdFolders({accessToken : '', currentFolder : folderPath, isNew : false, email:this.email})
+        .then(result=>{
+            this.folderAndFile = result.map(record => {
+                console.log(record.fileType);
+                if (record.fileType === 'folder') {
+                    record.isFolderfromhere = true;
+                } else {
+                    record.isFolderfromhere = false;
+                }
+                console.log(record.isFolderfromhere);
+                let iconNameFromMethod;
+                iconNameFromMethod = this.getIconNameForMimeType(record.fileType);
+                console.log(iconNameFromMethod);
+                return {
+                    ...record,
+                    isFolder: Boolean(record.isFolderfromhere),
+                    iconName: iconNameFromMethod,
+                };
+            });
+            this.folderAndFileLength = this.folderAndFile?.length ?? 0;
+            console.log('total no of object-->',this.folderAndFileLength);        
+            const path = this.path.slice(0, index + 1);
+            this.path = path;
+            this.isLoading = false;
+        })
+        .catch(error => {
+            this.isLoading = false
+            this.showToast('Error', error.body.message, 'error');
+        });
     }
-
+    
     getIconNameForMimeType(mimeType) {
         switch (mimeType) {
             case 'application/pdf':

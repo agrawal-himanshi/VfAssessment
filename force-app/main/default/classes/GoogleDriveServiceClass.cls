@@ -90,7 +90,7 @@ public with sharing class GoogleDriveServiceClass {
         return new IntegrationWrapperClass(response.getBody(),String.valueof(response.getStatusCode()));
 
     }
-    
+
     public static IntegrationWrapperClass createFolderInGoogleDrive(String accessToken, String folderName, String parentId){
         HttpRequest request = new HttpRequest();
         String bodyRequest = JSON.serialize(new Map<String, Object>{
@@ -109,14 +109,16 @@ public with sharing class GoogleDriveServiceClass {
         return new IntegrationWrapperClass(response.getBody(),String.valueof(response.getStatusCode()));
     }
 
-
     public static IntegrationWrapperClass uploadFile(String accessToken, String fileName, String fileContent,String folderId,String mimeType){
         Blob fileBlob = EncodingUtil.base64Decode(fileContent);
-        String metadata = JSON.serialize(new Map<String, Object>{
+        Map<String, Object> metadataMap = new Map<String, Object>{
             'name' => fileName,
-            'parents' => new List<String>{folderId},
             'mimeType' => mimeType
-        });
+        };
+        if (!String.isBlank(folderId)) {
+            metadataMap.put('parents', new List<String>{folderId});
+        }
+        String metadata = JSON.serialize(metadataMap);
         String boundary = '-------314159265358979323846';
         String delimiter = '--' + boundary + '\r\n';
         String closeDelimiter = '\r\n--' + boundary + '--';
@@ -137,6 +139,7 @@ public with sharing class GoogleDriveServiceClass {
         req.setBody(body);
         Http http = new Http();
         HttpResponse response = http.send(req);
+        System.debug(response.getBody());
         return new IntegrationWrapperClass(response.getBody(),String.valueof(response.getStatusCode()));
 
     }

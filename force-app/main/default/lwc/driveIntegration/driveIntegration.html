@@ -65,7 +65,7 @@
                             <lightning-card class="card">
                                 <lightning-breadcrumbs class="slds-m-around_small">
                                     <template for:each={path} for:item="item">
-                                        <lightning-breadcrumb key={item.value} name={item.value} label={item.label} onclick={handlePath}></lightning-breadcrumb>
+                                        <lightning-breadcrumb key={item.value} name={item.value} label={item.label} data-value={item.value} onclick={handlePath}></lightning-breadcrumb>
                                     </template>
                                 </lightning-breadcrumbs>
                             </lightning-card>
@@ -110,7 +110,7 @@
                                                             <lightning-button label="Download" class="slds-truncate slds-m-right_small" title="Download"></lightning-button>
                                                         </a>
                                                     </template>
-                                                    <lightning-button label="Delete" class="slds-truncate" title="Delete" data-id={record.fileId} data-type={record.isFolder} onclick={deleteFile}></lightning-button>
+                                                    <lightning-button label="Delete" class="slds-truncate {record.isFolder ? '' : 'delete-button-right'}" title="Delete" data-id={record.fileId} data-type={record.isFolder} onclick={deleteFile}></lightning-button>
                                                 </lightning-button-group>
                                             </td>
                                         </tr>
@@ -177,7 +177,7 @@
                     </header>
                     <div class="slds-modal__content slds-p-around_medium">
                         <lightning-input type="file" label="Upload File" onchange={onUpload}></lightning-input>
-                        <span class="uploaded-file-name">{fileName}</span>
+                        <span class="uploaded-file-name">{fileNameFromUi}</span>
                     </div>
                     <footer class="slds-modal__footer">
                         <lightning-button variant="neutral" label="Cancel" onclick={hideUploadFolderModal}></lightning-button>

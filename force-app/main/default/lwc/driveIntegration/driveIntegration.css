@@ -106,3 +106,8 @@
     background-color: rgb(184, 180, 180); 
 }
 
+.delete-button-right {
+    float: right;
+    margin-right: 15px;
+}
+
