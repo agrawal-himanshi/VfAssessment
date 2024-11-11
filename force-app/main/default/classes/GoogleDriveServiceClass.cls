@@ -144,5 +144,20 @@ public with sharing class GoogleDriveServiceClass {
 
     }
 
+    public static IntegrationWrapperClass revokeToken(String accessToken) {
+        Http http = new Http();
+        HttpRequest request = new HttpRequest();
+        request.setEndpoint('https://accounts.google.com/o/oauth2/revoke?token=' + accessToken);
+        request.setMethod('POST');
+        request.setHeader('Content-Length', '0');
+        HttpResponse response = http.send(request);
+        System.debug('Status Code: ' + response.getStatusCode());
+        System.debug('Response Body: ' + response.getBody());
+        if (response.getStatusCode() != 200) {
+            System.debug('Error Response: ' + response.getBody());
+            throw new AuraHandledException('Failed to revoke user ' + response.getStatusCode());
+        }             
+        return new IntegrationWrapperClass(response.getBody(),String.valueof(response.getStatusCode()));
+    }
 
 }

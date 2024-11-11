@@ -13,7 +13,7 @@
 }
 
 .main-content {
-    background-color:rgb(228, 244, 240);
+    background-color: rgb(115 183 154);
     padding: 20px;
     max-height: 100svh; 
 }
@@ -103,11 +103,8 @@
 }
 
 .selected-email {
-    background-color: rgb(184, 180, 180); 
+    background-color: rgb(150 230 190);
+    font-weight: bold;
 }
 
-.delete-button-right {
-    float: right;
-    margin-right: 15px;
-}
 

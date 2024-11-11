@@ -1,0 +1,48 @@
+<template>
+    <div class="slds-grid slds-wrap slds-grid_align-spread main-content">
+        <template if:true={isLoading}>
+            <div class="slds-spinner_container">
+                <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+            </div>
+        </template>
+        <header class="slds-grid slds-size_1-of-1 header">
+            <div class="slds-col slds-size_1-of-2 slds-text-align_left header-left">
+                <div class="slds-grid slds-grid_vertical-align-center">
+                    <img src={myCustomIconUrl} alt="Google Drive" class="google-drive-icon slds-m-left_x-small" />
+                    <h1 class="slds-text-heading_bold header-title">Google Drive Accounts</h1>
+                </div>
+            </div>
+            <div class="slds-col slds-size_1-of-2 slds-text-align_right">
+                <lightning-button-menu alternative-text="Settings Menu" icon-name="utility:user" icon-size="medium" onselect={handleMenuSelect} class="slds-dropdown-trigger slds-dropdown-trigger_click">
+                    <lightning-menu-item label="HomePage" value="homePage"></lightning-menu-item>
+                    <lightning-menu-item label="Logout" value="logout"></lightning-menu-item>
+                </lightning-button-menu>
+            </div>
+        </header>
+        <div style="overflow: scroll; width: 100%;">
+            <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-scrollable_x">
+                <thead class="custom-thead">
+                    <tr class="slds-text-heading--label">
+                        <th scope="col" style="width: 50%;"><div class="slds-truncate" style="margin-left: 15px;">Email</div></th>
+                        <th scope="col" style="width: 50px;"><div class="slds-truncate">Action</div></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template for:each={ConnectedAccMailIds} for:item="record">
+                        <tr key={record.Id} class="slds-hint-parent" data-id={record.Id}>
+                            <td data-label="Email" style="width: 50%;">
+                                <div class="slds-truncate" title={record.user_mail__c}>{record.user_mail__c}</div>
+                            </td>
+                            <td data-label="Revoke" style="width:150px;">
+                                <lightning-button label="Revoke" onclick={handleActionClick} data-id={record.Id}></lightning-button>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</template>      
+
+
+

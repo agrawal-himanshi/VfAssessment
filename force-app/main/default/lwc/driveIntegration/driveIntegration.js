@@ -1,6 +1,7 @@
 import { LightningElement, track } from 'lwc';
 import driveIcon from '@salesforce/resourceUrl/driveIcon';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { NavigationMixin } from 'lightning/navigation';
 import createAuthURL from '@salesforce/apex/driveController.createAuthURL';
 import getAccessToken from '@salesforce/apex/driveController.getAccessToken';
 import createAuthURLForOtherAcc from '@salesforce/apex/driveController.createAuthURLForOtherAcc';
@@ -10,8 +11,9 @@ import createFolderInGoogleDrive from '@salesforce/apex/driveController.createFo
 import getAllAccMailIds from '@salesforce/apex/driveController.getAllAccMailIds';
 import uploadFile from '@salesforce/apex/driveController.uploadFile';
 import userDetails from '@salesforce/apex/driveController.userDetails';
+import getTokens from '@salesforce/apex/driveController.getTokens';
 
-export default class DriveIntegration extends LightningElement {
+export default class DriveIntegration extends NavigationMixin(LightningElement) {
     myCustomIconUrl = driveIcon;
 
     @track isLoading = false;
@@ -19,6 +21,7 @@ export default class DriveIntegration extends LightningElement {
     @track email;
     @track fetchedAccessToken;
     @track type;
+    @track isSettingsVisible = false;
     @track folderAndFileLength;
     @track isSidebarExpanded = true;
     @track ConnectedAccMailIds = [];
@@ -32,6 +35,7 @@ export default class DriveIntegration extends LightningElement {
     @track fileNameFromUi = '';
     @track fileContentFromUi;
     @track folderName;
+    @track connectedAccountTokens = {}; 
 
     get sidebarClass() {
         return `sidebar ${this.isSidebarExpanded ? 'expanded' : 'collapsed'}`;
@@ -116,11 +120,17 @@ export default class DriveIntegration extends LightningElement {
                 getAllAccMailIds()
                 .then(result => {
                     this.ConnectedAccMailIds = result;
-                    if (this.ConnectedAccMailIds.length > 0) {
-                        this.email = this.ConnectedAccMailIds[0]; 
-                    }
-                })  
-            })            
+                })
+                userDetails({accessToken : this.fetchedAccessToken})
+                .then(user => {
+                    this.username = user.username;
+                    this.email = user.email;
+                    console.log('User details set:', this.username, this.email);
+                })
+                .catch(error => {
+                    console.error('Error retrieving user details:', error);
+                });
+            })
             .catch(error => {
                 this.isLoading=false;
                 this.showToast('Error', error.body.message, 'error');
@@ -163,7 +173,12 @@ export default class DriveIntegration extends LightningElement {
         if (selectedValue === 'User Details') {
             this.viewUserModal= true;
         } else if (selectedValue === 'settings') {
-            // Handle settings
+            this[NavigationMixin.Navigate]({
+                type: 'standard__webPage',
+                attributes: {
+                    url: '/settings'
+                }
+            });
         } else if (selectedValue === 'logout') {
             // Handle logout
         }
@@ -172,7 +187,7 @@ export default class DriveIntegration extends LightningElement {
     toggleSidebar() {
         this.isSidebarExpanded = !this.isSidebarExpanded;
     }
-  
+    
     handleEmailClick(event) {
         const previouslySelected = this.template.querySelector('.selected-email');
         if (previouslySelected) {
@@ -181,8 +196,21 @@ export default class DriveIntegration extends LightningElement {
         const clickedEmail = event.target;
         clickedEmail.classList.add('selected-email');
         this.email = event.target.dataset.email; 
-        console.log(this.email);        
-        this.showCurrentFoldersAndFiles();
+        console.log(this.email);
+        getTokens({mailId : this.email})
+        .then(result => {
+            console.log(result);
+            this.fetchedAccessToken = result.Access_Token__c;
+            console.log(this.fetchedAccessToken);
+            userDetails({accessToken : this.fetchedAccessToken})
+            .then(user => {
+                console.log(user);
+                this.username = user.username;
+                this.email = user.email;
+                console.log('User details set:', this.username, this.email);
+            })
+            this.showCurrentFoldersAndFiles();
+        })
     }
     
     showCurrentFoldersAndFiles(){
@@ -355,7 +383,6 @@ export default class DriveIntegration extends LightningElement {
     }
 
     deleteFile(event) {
-        // console.log(event.currentTarget);
         console.log('in delete file');
         this.isLoading = true;
         let folderId = event.currentTarget.dataset.id;

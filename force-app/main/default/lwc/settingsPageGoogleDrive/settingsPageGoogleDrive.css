@@ -1,0 +1,43 @@
+
+.main-content {
+    background-color: rgb(115 183 154);
+    padding: 20px;
+    height:100%;
+}
+
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid black;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+}
+
+.header-left {
+    margin-bottom: 0;
+}
+
+.header-title {
+    margin-left: 5px;
+}
+
+.google-drive-icon {
+    width: 24px; 
+    height: 24px; 
+}
+
+.slds-dropdown-trigger {
+    width: 110px; 
+}
+
+.custom-thead {
+    background-color: #f4f6f9; 
+    height: 40px; 
+}
+
+.custom-thead th {
+    vertical-align: middle; 
+    padding: 10px; 
+}

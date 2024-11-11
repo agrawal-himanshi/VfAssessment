@@ -31,14 +31,14 @@ public with sharing class driveController {
                 if (tokens != null) { 
                     uriMap.put('email',emailId);
                     uriMap.put('haveAccessToken',tokens.Access_Token__c);
-                    if (tokens.Expire_In_Time__c < System.now()) { 
-                        Map<String, String> jsonValues = accessTokenWithRefreshToken(googleDrive.AppKey__c, googleDrive.AppSecret__c, tokens.Refresh_Token__c, recordd.user_mail__c);
-                        if (jsonValues.isEmpty()) {
-                            uriMap.put('isRedirect', true);
-                        } else {
-                            uriMap.put('isRedirect', false);
-                            saveToken(jsonValues.get('access_token'), null, jsonValues.get('expires_in'), tokens.user_mail__c);
-                        }  
+                    if (tokens.Expire_In_Time__c < System.now()) {
+                        System.enqueueJob(new RefreshTokenJob(
+                            googleDrive.AppKey__c, 
+                            googleDrive.AppSecret__c, 
+                            tokens.Refresh_Token__c, 
+                            recordd.user_mail__c
+                        ));
+                        uriMap.put('isRedirect', false);
                     }
                 }
             }
@@ -48,6 +48,26 @@ public with sharing class driveController {
         }
     }
 
+    public class RefreshTokenJob implements Queueable, Database.AllowsCallouts {
+        private String clientId;
+        private String clientSecret;
+        private String refreshToken;
+        private String email;
+        public RefreshTokenJob(String clientId, String clientSecret, String refreshToken, String email) {
+            this.clientId = clientId;
+            this.clientSecret = clientSecret;
+            this.refreshToken = refreshToken;
+            this.email = email;
+        }
+        public void execute(QueueableContext context) {
+            Map<String, String> jsonValues = accessTokenWithRefreshToken(clientId, clientSecret, refreshToken, email);
+    
+            if (!jsonValues.isEmpty()) {
+                saveToken(jsonValues.get('access_token'), jsonValues.get('refresh_token'), jsonValues.get('expires_in'), email);
+            }
+        }
+    }
+    
     @AuraEnabled
     public static UserDetailsWrapper getAccessToken(String code){
         try{    
@@ -86,6 +106,7 @@ public with sharing class driveController {
     public static UserDetailsWrapper userDetails(String accessToken) {
         try {
             IntegrationWrapperClass response;
+            System.debug(accessToken);
             response = GoogleDriveServiceClass.getUserDetails(accessToken);
             if (response.responseStatusCode == '200') {
                 system.debug(response.responseBody);
@@ -249,7 +270,6 @@ public with sharing class driveController {
             if(String.isBlank(current) || current == 'root'){
                 current = '';
             }
-            // String filePath = current + '/' + fileName;
             if(accessToken == '' || accessToken == null){
                 accessToken = tokens.Access_Token__c;
             }
@@ -278,7 +298,6 @@ public with sharing class driveController {
                 errorMessage = (String) jsonMap.get('message');
                 throw new AuraHandledException(errorMessage);
             }
-            
         } catch (Exception e) {
             if(String.isBlank(errorMessage)){
                 errorMessage = e.getMessage();
@@ -286,7 +305,6 @@ public with sharing class driveController {
             throw new AuraHandledException(errorMessage);
         }
     }
-    
 
     @AuraEnabled
     public static Map<string, string> accessTokenWithRefreshToken(String clientId,String clientSecret,String refreshToken,String email){
@@ -305,6 +323,25 @@ public with sharing class driveController {
             aura.redirect(uri);
         }
         return jsonValues;
+    }
+
+    @AuraEnabled
+    public static String revokeGoogleDriveAccount(String IdOfRecord) {
+        try {
+            Integration_Access__c record = [SELECT Access_Token__c FROM Integration_Access__c WHERE Id = :IdOfRecord LIMIT 1];
+            IntegrationWrapperClass res = GoogleDriveServiceClass.revokeToken(record.Access_Token__c);
+            system.debug(res.responseStatusCode);
+            if(res.responseStatusCode == '200'){   
+                delete record;
+                return 'Success';
+            }
+            else{
+                throw new AuraHandledException(res.responseBody);
+            }            
+        }
+        catch(Exception e){
+            throw new AuraHandledException(e.getMessage());
+        }
     }
 
     public class UserDetailsWrapper {

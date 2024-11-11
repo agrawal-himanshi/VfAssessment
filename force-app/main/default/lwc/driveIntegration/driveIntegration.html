@@ -43,8 +43,8 @@
                                 <template for:each={ConnectedAccMailIds} for:item="AccMailId">
                                     <tr key={AccMailId.Id} class="slds-hint-parent">
                                         <td data-label="User Email">
-                                            <div class="slds-truncate" title={AccMailId.user_mail__c}>
-                                                <a class="slds-truncate" data-email={AccMailId.user_mail__c} onclick={handleEmailClick} >{AccMailId.user_mail__c}</a>
+                                            <div class="slds-truncate" title={AccMailId.user_mail__c}> 
+                                                <a class="slds-truncate"  data-email={AccMailId.user_mail__c} onclick={handleEmailClick} >{AccMailId.user_mail__c}</a>
                                             </div>
                                         </td>
                                     </tr>
@@ -104,14 +104,15 @@
                                                 </template>
                                             </td>
                                             <td class="slds-text-align_center" data-label="Download" style="width:150px;">
-                                                <lightning-button-group>
-                                                    <template if:false={record.isFolder}>
-                                                        <a href={record.downloadLink} download>
-                                                            <lightning-button label="Download" class="slds-truncate slds-m-right_small" title="Download"></lightning-button>
-                                                        </a>
-                                                    </template>
-                                                    <lightning-button label="Delete" class="slds-truncate {record.isFolder ? '' : 'delete-button-right'}" title="Delete" data-id={record.fileId} data-type={record.isFolder} onclick={deleteFile}></lightning-button>
-                                                </lightning-button-group>
+                                                <template if:false={record.isFolder}>
+                                                    <a href={record.downloadLink} download>
+                                                        <lightning-button label="Download" class="slds-truncate slds-m-right_small" title="Download"></lightning-button>
+                                                    </a>
+                                                    <lightning-button label="Delete" class="slds-truncate" title="Delete" data-id={record.fileId} data-type={record.isFolder} onclick={deleteFile}></lightning-button>
+                                                </template>
+                                                <template if:true={record.isFolder}>
+                                                    <lightning-button label="Delete" class="slds-truncate" title="Delete" data-id={record.fileId} data-type={record.isFolder} onclick={deleteFile} style="margin-left: 120px;"></lightning-button>
+                                                </template>
                                             </td>
                                         </tr>
                                     </template>
