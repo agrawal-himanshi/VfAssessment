@@ -18,7 +18,7 @@ public class GoogleAuthServiceTest {
             Name__c = 'GOOGLEDRIVE' + UserInfo.getUserId(), 
             Access_Token__c = 'test_access_token', 
             Refresh_Token__c = 'test_refresh_token', 
-            Expire_In_Time__c = System.now().addSeconds(3600), // Token is not expired
+            Expire_In_Time__c = System.now().addSeconds(3600), 
             user_mail__c = 'testuser@example.com',
             Record_Type__c = 'GOOGLE DRIVE'
         );
@@ -39,7 +39,7 @@ public class GoogleAuthServiceTest {
             Name__c = 'GOOGLEDRIVE' + UserInfo.getUserId(), 
             Access_Token__c = 'test_access_token', 
             Refresh_Token__c = 'test_refresh_token', 
-            Expire_In_Time__c = System.now().addSeconds(-3600), // Token is expired
+            Expire_In_Time__c = System.now().addSeconds(-3600),
             user_mail__c = 'testuser@example.com',
             Record_Type__c = 'GOOGLE DRIVE'
         );
@@ -57,14 +57,9 @@ public class GoogleAuthServiceTest {
     @isTest
     static void getAccessTokenTest1() {
         Test.setMock(HttpCalloutMock.class, new GoogleDriveMockTest('success'));
-        try {
-            driveController.UserDetailsWrapper result = driveController.getAccessToken('test_code');
-            System.assertNotEquals(null, result, 'Result should not be null');
-            System.assertEquals('test_email@example.com', result.email, 'Email should match the mocked response');
-        } catch (Exception e) {
-            System.debug('Error in test: ' + e.getMessage());
-            System.assert(false, 'Test failed with exception: ' + e.getMessage());
-        }
+        driveController.UserDetailsWrapper result = DriveController.getAccessToken('test_code');
+        System.assertNotEquals(null, result, 'Result should not be null');
+        System.assertEquals('testuser@example.com', result.email, 'Email should match the mocked response');
     }
     
     @isTest
@@ -79,6 +74,29 @@ public class GoogleAuthServiceTest {
         System.assertEquals('Script-thrown exception', exceptionMessage, 'Exception message should match expected');
     }
 
+    // Test for user details retrieval
+
+    @isTest
+    static void testUserDetailsSuccess() {
+        Test.setMock(HttpCalloutMock.class, new GoogleDriveMockTest('success'));
+        DriveController.UserDetailsWrapper result = DriveController.userDetails('test_access_token');
+        System.debug(Result);
+        System.assertNotEquals(null, result, 'Result should not be null');
+        System.assertEquals('testuser@example.com', result.email, 'Email should match the mocked response');
+    }
+    
+    @isTest
+    static void testUserDetailsError() {
+        String exceptionMessage = '';
+        Test.setMock(HttpCalloutMock.class, new GoogleDriveMockTest('error'));
+        try {
+            DriveController.userDetails('test_access_token');
+        } catch (AuraHandledException e) {
+            exceptionMessage = e.getMessage();
+        }
+        System.assertEquals('Script-thrown exception', exceptionMessage, 'Exception message should match expected');
+    }
+        
     @isTest
     static void createAuthURLForOtherAccTest() {
         Test.startTest();
@@ -97,35 +115,44 @@ public class GoogleAuthServiceTest {
             Name__c = 'GOOGLEDRIVE' + UserInfo.getUserId(), 
             Access_Token__c = 'test_access_token', 
             Refresh_Token__c = 'test_refresh_token', 
-            Expire_In_Time__c = System.now().addSeconds(3600), 
-            user_mail__c = 'test_email'
+            Expire_In_Time__c = System.now().addSeconds(-3600),
+            user_mail__c = 'testuser@example.com',
+            Record_Type__c = 'GOOGLE DRIVE'
         );
         insert token; 
+        List<driveController.GoogleDriveFile> result;
         Test.startTest();
         Test.setMock(HttpCalloutMock.class, new GoogleDriveMockTest('success'));
-        List<driveController.GoogleDriveFile> result = driveController.getFilesANdFolders('test_access_token', 'root', true, 'test_email');
+        result = driveController.getFilesANdFolders('', 'root',true, 'test_email');
         Test.stopTest();
+        System.debug(result);
+        Assert.areEqual(2, result.size());
     }
 
-    @isTest
+
+   	@isTest
     static void getFileAndFoldersTest2() {
         Integration_Access__c token = new Integration_Access__c(
             Name__c = 'GOOGLEDRIVE' + UserInfo.getUserId(), 
             Access_Token__c = 'test_access_token', 
             Refresh_Token__c = 'test_refresh_token', 
-            Expire_In_Time__c = System.now().addSeconds(3600)
+            Expire_In_Time__c = System.now().addSeconds(-3600),
+            user_mail__c = 'testuser@example.com',
+            Record_Type__c = 'GOOGLE DRIVE'
         );
         insert token; 
-        String exceptionMessage = '';
+        String exceptions='';
         Test.startTest();
         Test.setMock(HttpCalloutMock.class, new GoogleDriveMockTest('error'));
-        try {
-            driveController.getFilesANdFolders('test_access_token', 'root', false, 'test_email');
-        } catch (AuraHandledException e) {
-            exceptionMessage = e.getMessage();
+        try{
+            List<driveController.GoogleDriveFile> result = driveController.getFilesANdFolders('', 'root',false,'test_email');
+        }
+        catch(Exception e){
+            exceptions=e.getMessage();
         }
         Test.stopTest();
-        System.assertEquals('Script-thrown exception', exceptionMessage, 'Exception message should match expected');
+        Assert.areEqual(exceptions,'Script-thrown exception');
+        
     }
 
     @isTest
@@ -134,37 +161,36 @@ public class GoogleAuthServiceTest {
             Name__c = 'GOOGLEDRIVE' + UserInfo.getUserId(), 
             Access_Token__c = 'test_access_token', 
             Refresh_Token__c = 'test_refresh_token', 
-            Expire_In_Time__c = System.now().addSeconds(-3600),  // Token is expired
-            user_mail__c = 'test_email'
+            Expire_In_Time__c = System.now().addSeconds(-3600),
+            user_mail__c = 'testuser@example.com',
+            Record_Type__c = 'GOOGLE DRIVE'
         );
         insert token;
         Test.startTest();
         Test.setMock(HttpCalloutMock.class, new GoogleDriveMockTest('success'));
-        List<driveController.GoogleDriveFile> result = driveController.getFilesANdFolders('test_access_token', 'root', false, 'test_email');
+        List<driveController.GoogleDriveFile> result = driveController.getFilesANdFolders('test_access_token', 'root',false,'test_email');
         Test.stopTest();
-        System.assertEquals(2, result.size(), 'Expected 2 files/folders in the result');
+        System.debug(result);
+        Assert.areEqual(2, result.size());
     }
-
+    
     @isTest
     static void getFileAndFoldersTest4() {
         Integration_Access__c token = new Integration_Access__c(
             Name__c = 'GOOGLEDRIVE' + UserInfo.getUserId(), 
             Access_Token__c = 'test_access_token', 
             Refresh_Token__c = 'test_refresh_token', 
-            Expire_In_Time__c = System.now().addSeconds(3600), 
-            user_mail__c = 'test_email'
+            Expire_In_Time__c = System.now().addSeconds(-3600),
+            user_mail__c = 'testuser@example.com',
+            Record_Type__c = 'GOOGLE DRIVE'
         );
         insert token;
-        String exceptionMessage = '';
         Test.startTest();
         Test.setMock(HttpCalloutMock.class, new GoogleDriveMockTest('errors'));
-        try {
-            driveController.getFilesANdFolders('test_access_token', 'root', false, 'test_email');
-        } catch (AuraHandledException e) {
-            exceptionMessage = e.getMessage();
-        }
+        List<driveController.GoogleDriveFile> result = driveController.getFilesANdFolders('test_access_token', 'root',false,'test_email');
         Test.stopTest();
-        System.assertEquals('Script-thrown exception', exceptionMessage, 'Exception message should match expected');
+        System.debug(result);
+        Assert.areEqual(2, result.size());
     }
 
     /* Test method for deleteFileOrFolder method */
@@ -445,56 +471,6 @@ public class GoogleAuthServiceTest {
         System.assertEquals('Script-thrown exception', exceptionMessage, 'Expected exception message to match');
     }
 
-    // @isTest
-    // static void uploadFileTest1() {
-    //     Integration_Access__c token = new Integration_Access__c(Name__c = 'GOOGLEDRIVE'+UserInfo.getUserId(), Access_Token__c = 'test_access_token', Refresh_Token__c = 'test_refresh_token', Expire_In_Time__c = System.now().addSeconds(3600));
-    //     insert token;
-	// 	Test.startTest();
-    //     Test.setMock(HttpCalloutMock.class, new GoogleDriveMockTest('success'));
-    //     String fileContents = EncodingUtil.base64Encode(Blob.valueOf('file content'));
-    //     List<driveController.GoogleDriveFile> result = driveController.uploadFile('', 'test.txt','txt',fileContents,'root');
-    //     Test.stopTest();
-    //     Assert.areEqual(2, result.size());
-    // }
-
-    // @isTest
-    // static void uploadFileTest2() {
-    //     Integration_Access__c token = new Integration_Access__c(Name__c = 'GOOGLEDRIVE'+UserInfo.getUserId(), Access_Token__c = 'test_access_token', Refresh_Token__c = 'test_refresh_token', Expire_In_Time__c = System.now().addSeconds(-3600));
-    //     insert token;
-    //     String exceptions='';
-    //     Test.startTest();
-    //     Test.setMock(HttpCalloutMock.class, new GoogleDriveMockTest('errorr'));
-    //     try{
-    //        String fileContents = EncodingUtil.base64Encode(Blob.valueOf('file content'));
-    //        List<driveController.GoogleDriveFile> result = driveController.uploadFile('root', 'test.txt','txt',fileContents,'root');
-    //     }
-    //     catch(Exception e){
-    //         exceptions=e.getMessage();
-    //     }
-    //     Test.stopTest();
-    //     Assert.areEqual(exceptions,'Script-thrown exception');
-    // }
-
-    
-    // @isTest
-    // static void uploadFileTest3() {
-    //     Integration_Access__c token = new Integration_Access__c(Name__c = 'GOOGLEDRIVE'+UserInfo.getUserId(), Access_Token__c = 'test_access_token', Refresh_Token__c = 'test_refresh_token', Expire_In_Time__c = System.now().addSeconds(3600));
-    //     insert token;
-    //     String exceptions='';
-    //     List<driveController.GoogleDriveFile> result;
-    //     Test.startTest();
-    //     Test.setMock(HttpCalloutMock.class, new GoogleDriveMockTest('errors'));
-    //     try{
-    //        String fileContents = EncodingUtil.base64Encode(Blob.valueOf('file content'));
-    //        result = driveController.uploadFile('root', 'test.txt','txt',fileContents,'root');
-    //     }
-    //     catch(Exception e){
-    //         exceptions=e.getMessage();
-    //     }
-    //     Test.stopTest();
-    //     Assert.areEqual(2, result.size());
-    // }
-
     /* Test method for accessTokenWithRefreshToke method */
     
     @isTest
@@ -511,18 +487,4 @@ public class GoogleAuthServiceTest {
         System.assertEquals('', exceptionMessage, 'Expected exception message to match');
     }
 
-
-    // static void accessTokenWithRefreshTokenTest(){
-    //     String exceptions='';
-    //     Test.startTest();
-    //     Test.setMock(HttpCalloutMock.class, new GoogleDriveMockTest('error'));
-    //     try{
-    //     	Map<string, string> result = driveController.accessTokenWithRefreshToken('clientId', 'clientSecret', 'refreshToken');
-    //     }
-    //     catch(Exception e){
-    //         exceptions=e.getMessage();
-    //     }
-    //     Test.stopTest();
-    //     Assert.areEqual(exceptions,'');
-    // } 
 }

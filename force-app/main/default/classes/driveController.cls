@@ -61,8 +61,7 @@ public with sharing class driveController {
         }
         public void execute(QueueableContext context) {
             Map<String, String> jsonValues = accessTokenWithRefreshToken(clientId, clientSecret, refreshToken, email);
-    
-            if (!jsonValues.isEmpty()) {
+            if (jsonValues != null && !jsonValues.isEmpty()) {
                 saveToken(jsonValues.get('access_token'), jsonValues.get('refresh_token'), jsonValues.get('expires_in'), email);
             }
         }
