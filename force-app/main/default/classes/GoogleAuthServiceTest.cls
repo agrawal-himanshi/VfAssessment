@@ -129,7 +129,6 @@ public class GoogleAuthServiceTest {
         Assert.areEqual(2, result.size());
     }
 
-
    	@isTest
     static void getFileAndFoldersTest2() {
         Integration_Access__c token = new Integration_Access__c(

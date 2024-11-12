@@ -1,0 +1,25 @@
+<template>
+    <div class="slds-grid slds-wrap slds-grid_align-spread main-content">
+        <template if:true={isLoading}>
+            <div class="slds-spinner_container">
+                <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+            </div>
+        </template>
+        <header class="slds-grid slds-size_1-of-1 slds-border_bottom header">
+            <div class="slds-col slds-size_1-of-2 slds-text-align_left header-left">
+                <div class="slds-grid slds-grid_vertical-align-center" style="margin-bottom: 10px;">
+                    <lightning-icon icon-name="standard:home" alternative-text="Home" size="small" class="slds-m-left_x-small"></lightning-icon>
+                    <h1 class="slds-text-heading_bold header-title">Home</h1>
+                </div>
+            </div>
+        </header>
+        <div class="slds-m-top_medium slds-p-bottom_small body">
+        <div class="new-content">
+            <p>This is the content below the header, separated by a line.</p>
+        </div>
+    </div>
+    </div>
+</template>      
+
+
+
