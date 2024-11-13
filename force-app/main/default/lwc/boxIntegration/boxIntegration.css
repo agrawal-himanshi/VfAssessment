@@ -11,10 +11,6 @@
     opacity: 0.3;
 }
 
-.slds-border_bottom {
-    border-bottom: 2px solid black; 
-}
-
 .slds-m-top_medium {
     margin-top: 16px; 
 }
@@ -23,15 +19,24 @@
     margin-left: 5px;
 }
 
-.header{
-    margin-top: 30px;
-}
-
 .header-left{
     margin-left: 10px;
 }
 
 .body{
+    margin-top: 10px;
     margin-left: 10px;
+    height: 580px;
 }
+
+.box{
+    margin-bottom: 10px;
+    margin-top: 20px;
+}
+
+.box-icon {
+    width: 24px; 
+    height: 24px; 
+}
+
 
