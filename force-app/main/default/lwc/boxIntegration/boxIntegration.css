@@ -1,5 +1,6 @@
 .main-content {
-    background-color:lightslategray;
+    background-color:#f4f6f9;;
+    
 }
 
 .faded-background {
@@ -17,16 +18,12 @@
 
 .header-title {
     margin-left: 5px;
+    font-size: 30px;
+
 }
 
 .header-left{
     margin-left: 10px;
-}
-
-.body{
-    margin-top: 10px;
-    margin-left: 10px;
-    height: 580px;
 }
 
 .box{
@@ -35,8 +32,13 @@
 }
 
 .box-icon {
-    width: 24px; 
-    height: 24px; 
+    width: 40px; 
+    height: 40px; 
+}
+
+.right{
+    margin-right: 20px;
+    margin-top: 37px;
 }
 
 
