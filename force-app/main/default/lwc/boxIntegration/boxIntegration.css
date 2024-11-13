@@ -1,0 +1,42 @@
+.main-content {
+    background-color:lightslategray;
+}
+
+.faded-background {
+    transition: opacity 0.5s ease-in-out;
+    opacity: 1;
+}
+
+.faded-background.loading {
+    opacity: 0.3;
+}
+
+.slds-m-top_medium {
+    margin-top: 16px; 
+}
+
+.header-title {
+    margin-left: 5px;
+}
+
+.header-left{
+    margin-left: 10px;
+}
+
+.body{
+    margin-top: 10px;
+    margin-left: 10px;
+    height: 580px;
+}
+
+.box{
+    margin-bottom: 10px;
+    margin-top: 20px;
+}
+
+.box-icon {
+    width: 24px; 
+    height: 24px; 
+}
+
+
