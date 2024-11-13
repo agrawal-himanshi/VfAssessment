@@ -16,24 +16,104 @@
                 <div class="slds-grid slds-grid_vertical-align-center slds-grid_align-end right">
                     <!-- User Account Icon -->
                     <img src={userProfileImageUrl} alt="User Profile" class="profile-icon slds-m-right_small" style="width: 24px; height: 24px; border-radius: 50%;" />
-                    <!-- Three Dots Icon (using utility:threedots) -->
-                    <lightning-icon icon-name="utility:threedots_vertical" alternative-text="More options" size="small" style="height: 20px;"></lightning-icon>
                 </div>
             </div>
         </header>
         <!-- Body Section -->
         <div class="slds-grid slds-m-top_medium body">
             <!-- Left Sidebar -->
-            <div class="slds-col slds-size_1-of-4 slds-p-around_medium left-sidebar">
-                
+            <div class="slds-col slds-p-around_medium left-sidebar">
+                <!-- Files Section -->
+                <div class="files-section slds-grid slds-m-bottom_medium" style="cursor: pointer;" onclick={handleDivClick} data-id="files-section">
+                    <lightning-icon icon-name="doctype:folder" alternative-text="files" size="small" class="slds-m-right_x-small"></lightning-icon>
+                    <h1 class="slds-m-vertical_none">All Files</h1>
+                </div>
+                <!-- Photos Section -->
+                <div class="photos-section slds-grid slds-m-top_large slds-m-bottom_medium" style="cursor: pointer;" onclick={handleDivClick} data-id="photos-section">
+                    <lightning-icon icon-name="doctype:image" alternative-text="image" size="small" class="slds-m-right_x-small"></lightning-icon>
+                    <h1 class="slds-m-vertical_none">Photos</h1>
+                </div>
+                <!-- Videos Section -->
+                <div class="videos-section slds-grid slds-m-top_large slds-m-bottom_medium" style="cursor: pointer;" onclick={handleDivClick} data-id="videos-section">
+                    <lightning-icon icon-name="doctype:video" alternative-text="videos" size="small" class="slds-m-right_x-small"></lightning-icon>
+                    <h1 class="slds-m-vertical_none">Videos</h1>
+                </div>
+                <!-- Docs Section -->
+                <div class="docs-section slds-grid slds-m-top_large" style="cursor: pointer;" onclick={handleDivClick} data-id="docs-section">
+                    <lightning-icon icon-name="doctype:gdoc" alternative-text="documents" size="small" class="slds-m-right_x-small"></lightning-icon>
+                    <h1 class="slds-m-vertical_none">Documents</h1>
+                </div>
             </div>
-
+        
             <!-- Main Content Area -->
-            <div class="slds-col slds-size_3-of-4 slds-p-around_medium main-content-area">
+            <div class="slds-col slds-p-around_medium main-content-area">
+                <div class="slds-text-align_center" style="margin-bottom: 10px;">
+                    <h1 class="slds-text-heading_large">Welcome To Box</h1>
+                </div>
+                <div class="slds-grid slds-wrap slds-grid_align-spread" style="margin-bottom: 10px; display: flex; align-items: stretch;">
+                    <div class="slds-col slds-size_11-of-12 slds-grid_align-spread">
+                        <lightning-card class="card" hide-header>
+                            <lightning-breadcrumbs class="slds-m-around_small slds-grid slds-align-middle">
+                                <template for:each={path} for:item="item">
+                                    <lightning-breadcrumb key={item.value} name={item.value} label={item.label} data-value={item.value} onclick={handlePath}></lightning-breadcrumb>
+                                </template>
+                            </lightning-breadcrumbs>
+                        </lightning-card>
+                    </div>
+                    <div class="slds-col slds-size_1-of-12 slds-text-align--center slds-grid slds-align-middle">
+                        <lightning-button-menu alternative-text="Add Options" onselect={handleAddSelect}>
+                            <lightning-menu-item label="Create Folder" value="createFolder"></lightning-menu-item>
+                            <lightning-menu-item label="Upload Files" value="uploadFiles"></lightning-menu-item>
+                        </lightning-button-menu>
+                    </div>
+                </div>
+                <!-- <template if:true={recordsPresent}>
+                    <template if:true={folderAndFileLength}> -->
+                        <div style="overflow: scroll;">
+                            <!-- <div class="custom-table slds-scrollable_x"> -->
+                                <div class="table-header slds-grid">
+                                    <div class="slds-col" style="width: 50px;"></div>
+                                    <div class="slds-col" style="width: 50%;"><div class="slds-truncate">File/Folder</div></div>
+                                </div>
+                                <div class="table-body">
+                                    <template for:each={folderAndFile} for:item="record">
+                                        <div key={record.fileId} class="slds-hint-parent slds-grid slds-grid_align-spread table-row" data-id={record.fileId} data-name={record.fileName} data-type={record.fileType} data-path={record.pathDisplay}>
+                                            <div class="slds-col" style="width: 50px;">
+                                                <lightning-icon icon-name={record.iconName}></lightning-icon>
+                                            </div>
+                                            <div class="slds-col" style="width: 50%;">
+                                                <template if:true={record.isFolder}>
+                                                    <a class="slds-truncate" title={record.fileName} data-id={record.fileId} onclick={openFolder} data-path={record.pathDisplay} style="font-size: 14px;">{record.fileName}</a>
+                                                </template>
+                                                <template if:false={record.isFolder}>
+                                                    <a class="slds-truncate slds-m-right_small" title="preview" href={record.previewLink} target="_blank" style="font-size: 14px;">{record.fileName}</a>
+                                                </template>
+                                            </div>
+                                            <div class="slds-col slds-text-align_center" style="width:150px;">
+                                                <template if:false={record.isFolder}>
+                                                    <a href={record.downloadLink} download>
+                                                        <lightning-button label="Download" class="slds-truncate slds-m-right_small" title="Download"></lightning-button>
+                                                    </a>
+                                                    <lightning-button label="Delete" class="slds-truncate" title="Delete" data-id={record.fileId} data-type={record.isFolder} onclick={deleteFile}></lightning-button>
+                                                </template>
+                                                <template if:true={record.isFolder}>
+                                                    <lightning-button label="Delete" class="slds-truncate" title="Delete" data-id={record.fileId} data-type={record.isFolder} onclick={deleteFile} style="margin-left: 120px;"></lightning-button>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            <!-- </div> -->
+                        </div>                                      
+                    <!-- </template>
+                    <template if:false={folderAndFileLength}> -->
+                        <!-- <div class="slds-grid slds-grid_align-center slds-grid_vertical-align-center">
+                            <span style="font-size:2rem;">No Files Found</span>
+                        </div> -->
+                    <!-- </template>
+                </template> -->
+
             </div>
         </div>
     </div>
-</template>      
-
-
-
+</template>
