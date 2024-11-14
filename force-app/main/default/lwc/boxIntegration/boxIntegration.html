@@ -8,7 +8,7 @@
         <header class="slds-grid slds-size_1-of-1 header">
             <div class="slds-col slds-size_1-of-2 slds-text-align_left header-left">
                 <div class="slds-grid slds-grid_vertical-align-center box">
-                    <img src={myCustomIconUrl} alt="Box" class="box-icon slds-m-left_x-small" />
+                    <img src={myCustomIconUrl} alt="Box" class="box-icon slds-m-left_x-small" style="cursor: pointer;" />
                     <span class="slds-text-heading_bold header-title">Box</span>
                 </div>
             </div>
@@ -38,7 +38,7 @@
                     <lightning-icon icon-name="doctype:video" alternative-text="videos" size="small" class="slds-m-right_x-small"></lightning-icon>
                     <h1 class="slds-m-vertical_none">Videos</h1>
                 </div>
-                <!-- Docs Section -->
+                <!-- Document Section -->
                 <div class="docs-section slds-grid slds-m-top_large" style="cursor: pointer;" onclick={handleDivClick} data-id="docs-section">
                     <lightning-icon icon-name="doctype:gdoc" alternative-text="documents" size="small" class="slds-m-right_x-small"></lightning-icon>
                     <h1 class="slds-m-vertical_none">Documents</h1>
@@ -67,8 +67,8 @@
                         </lightning-button-menu>
                     </div>
                 </div>
-                <!-- <template if:true={recordsPresent}>
-                    <template if:true={folderAndFileLength}> -->
+                <template if:true={recordsPresent}>
+                    <template if:true={isEmpty}>
                         <div style="overflow: scroll;">
                             <!-- <div class="custom-table slds-scrollable_x"> -->
                                 <div class="table-header slds-grid">
@@ -105,14 +105,13 @@
                                 </div>
                             <!-- </div> -->
                         </div>                                      
-                    <!-- </template>
-                    <template if:false={folderAndFileLength}> -->
-                        <!-- <div class="slds-grid slds-grid_align-center slds-grid_vertical-align-center">
+                    </template>
+                    <template if:false={isEmpty}>
+                        <div class="slds-grid slds-grid_align-center slds-grid_vertical-align-center">
                             <span style="font-size:2rem;">No Files Found</span>
-                        </div> -->
-                    <!-- </template>
-                </template> -->
-
+                        </div>
+                    </template>
+                </template>
             </div>
         </div>
     </div>

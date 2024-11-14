@@ -4,7 +4,7 @@ public with sharing class GoogleDriveServiceClass {
     private static String filesEndpoint = 'https://www.googleapis.com/drive/v3/files';
     private static String uploadFileGoogleDrive = 'https://www.googleapis.com/upload/drive/v3/files';
     private static String peopleApiEndpoint = 'https://people.googleapis.com/v1/people/me?personFields=names,emailAddresses';
-    
+        
     public static IntegrationWrapperClass getaccessToken(String clientId, String clientSecret, String code, String redirectUri){
         Http h = new Http();
         HttpRequest req = new HttpRequest();
