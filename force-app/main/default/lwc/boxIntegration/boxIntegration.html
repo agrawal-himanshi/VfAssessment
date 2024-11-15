@@ -51,7 +51,7 @@
                     <h1 class="slds-text-heading_large">Welcome To Box</h1>
                 </div>
                 <div class="slds-grid slds-wrap slds-grid_align-spread" style="margin-bottom: 10px; display: flex; align-items: stretch;">
-                    <div class="slds-col slds-size_11-of-12 slds-grid_align-spread">
+                    <div class="slds-size_12-of-12">
                         <lightning-card class="card" hide-header>
                             <lightning-breadcrumbs class="slds-m-around_small slds-grid slds-align-middle">
                                 <template for:each={path} for:item="item">
@@ -60,53 +60,66 @@
                             </lightning-breadcrumbs>
                         </lightning-card>
                     </div>
-                    <div class="slds-col slds-size_1-of-12 slds-text-align--center slds-grid slds-align-middle">
-                        <lightning-button-menu alternative-text="Add Options" onselect={handleAddSelect}>
-                            <lightning-menu-item label="Create Folder" value="createFolder"></lightning-menu-item>
-                            <lightning-menu-item label="Upload Files" value="uploadFiles"></lightning-menu-item>
-                        </lightning-button-menu>
-                    </div>
                 </div>
+                <div class="slds-col" style="margin-top: 20px;">
+                    <lightning-button label="Create Folder" value="createFolder" onclick={createFolderInBox} style="margin-right: 10px;"></lightning-button>
+                    <lightning-button label="Upload Files" value="uploadFiles" onclick={uploadFileToBox}></lightning-button>
+                </div> 
+                <template if:true={createFolderModal}>
+                    <div class="slds-fade-in-open createModal">
+                        <div class="slds-grid header">
+                            <lightning-icon icon-name="doctype:folder" alternative-text="folder" size="small" class="slds-m-right_x-small"></lightning-icon>
+                            <h2>Create Folder</h2>
+                            <lightning-icon icon-name="utility:close" alternative-text="close" size="small" class="slds-m-right_x-small" onclick={closeModal} style="margin-left:400px"></lightning-icon>
+                        </div>
+                        <div class="slds-grid slds-grid_align-center">
+                            <lightning-input type="text" label="Folder Name" value={folderName} onchange={handleFolderNameChange}></lightning-input>
+                        </div>
+                        <div class="slds-grid slds-grid_align-center" style="margin-top: 20px;">
+                            <lightning-button label="Cancel" onclick={closeModal}></lightning-button>
+                            <lightning-button label="Create" onclick={createNewFolder}></lightning-button>
+                        </div>
+                    </div>
+                </template>
                 <template if:true={recordsPresent}>
-                    <template if:true={isEmpty}>
+                    <template if:true={isNotEmpty}>
                         <div style="overflow: scroll;">
-                            <!-- <div class="custom-table slds-scrollable_x"> -->
-                                <div class="table-header slds-grid">
-                                    <div class="slds-col" style="width: 50px;"></div>
-                                    <div class="slds-col" style="width: 50%;"><div class="slds-truncate">File/Folder</div></div>
-                                </div>
-                                <div class="table-body">
-                                    <template for:each={folderAndFile} for:item="record">
-                                        <div key={record.fileId} class="slds-hint-parent slds-grid slds-grid_align-spread table-row" data-id={record.fileId} data-name={record.fileName} data-type={record.fileType} data-path={record.pathDisplay}>
-                                            <div class="slds-col" style="width: 50px;">
-                                                <lightning-icon icon-name={record.iconName}></lightning-icon>
-                                            </div>
-                                            <div class="slds-col" style="width: 50%;">
-                                                <template if:true={record.isFolder}>
-                                                    <a class="slds-truncate" title={record.fileName} data-id={record.fileId} onclick={openFolder} data-path={record.pathDisplay} style="font-size: 14px;">{record.fileName}</a>
-                                                </template>
-                                                <template if:false={record.isFolder}>
-                                                    <a class="slds-truncate slds-m-right_small" title="preview" href={record.previewLink} target="_blank" style="font-size: 14px;">{record.fileName}</a>
-                                                </template>
-                                            </div>
-                                            <div class="slds-col slds-text-align_center" style="width:150px;">
-                                                <template if:false={record.isFolder}>
-                                                    <a href={record.downloadLink} download>
-                                                        <lightning-button label="Download" class="slds-truncate slds-m-right_small" title="Download"></lightning-button>
-                                                    </a>
-                                                    <lightning-button label="Delete" class="slds-truncate" title="Delete" data-id={record.fileId} data-type={record.isFolder} onclick={deleteFile}></lightning-button>
-                                                </template>
-                                                <template if:true={record.isFolder}>
-                                                    <lightning-button label="Delete" class="slds-truncate" title="Delete" data-id={record.fileId} data-type={record.isFolder} onclick={deleteFile} style="margin-left: 120px;"></lightning-button>
-                                                </template>
-                                            </div>
+                            <div class="table-header slds-grid">
+                                <div class="slds-col" style="width: 50px;"></div>
+                                <div class="slds-col" style="width: 50%;"><div class="slds-truncate">File/Folder</div></div>
+                                <div class="slds-col slds-text-align_center">Download</div>
+                                <div class="slds-col slds-text-align_center" style="margin-left: 80px;">Delete</div>
+                            </div>
+                            <div class="table-body">
+                                <template for:each={folderAndFile} for:item="record">
+                                    <div key={record.id} class="slds-hint-parent slds-grid table-row" data-id={record.id} data-name={record.name} data-type={record.type}>
+                                        <div class="slds-col" style="width: 50px;">
+                                            <lightning-icon icon-name={record.type}></lightning-icon>
                                         </div>
-                                    </template>
-                                </div>
-                            <!-- </div> -->
-                        </div>                                      
+                                        <div class="slds-col" style="width: 50%;">
+                                            <template if:true={record.isFolder}>
+                                                <a class="slds-truncate" title={record.fileName} data-id={record.fileId} onclick={openFolder} data-path={record.pathDisplay} style="font-size: 14px;">{record.name}</a>
+                                            </template>
+                                            <template if:false={record.isFolder}>
+                                                <a class="slds-truncate slds-m-right_small" title="preview" href={record.previewLink} target="_blank" style="font-size: 14px;">{record.name}</a>
+                                            </template>
+                                        </div> 
+                                        <div class="slds-col slds-grid slds-text-align_center slds-flex">
+                                            <template if:true={record.isDownloadable}>
+                                                <a class="slds-truncate slds-m-right_small" title="Download" onclick={deleteFile}>
+                                                    <lightning-icon icon-name="action:download"></lightning-icon>
+                                                </a>
+                                            </template>
+                                            <a class="slds-truncate slds-m-right_small" title="Delete" data-id={record.fileId} data-type={record.isFolder} onclick={deleteFile} style="margin-left: 120px;">
+                                             <lightning-icon icon-name="action:delete"></lightning-icon>
+                                            </a>                                        
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>                                     
                     </template>
-                    <template if:false={isEmpty}>
+                    <template if:false={isNotEmpty}>
                         <div class="slds-grid slds-grid_align-center slds-grid_vertical-align-center">
                             <span style="font-size:2rem;">No Files Found</span>
                         </div>

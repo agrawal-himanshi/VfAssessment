@@ -31,6 +31,8 @@ public with sharing class boxController {
                 if (tokens != null) { 
                     uriMap.put('email',emailId);
                     uriMap.put('haveAccessToken',tokens.Access_Token__c);
+                    uriMap.put('expiresIn',tokens.Expire_In_Time__c);
+                    uriMap.put('refreshtoken',tokens.refresh_token__c);
                     if (tokens.Expire_In_Time__c < System.now()) {
                         System.enqueueJob(new RefreshTokenJob(
                             box.AppKey__c, 
@@ -113,31 +115,24 @@ public with sharing class boxController {
     }
 
     @AuraEnabled
-    public static Map<string, string> accessTokenWithRefreshToken(String clientId,String clientSecret,String refreshToken,String email){
-        try {
-            IntegrationAssignment__mdt box = getMetaData();
-            String authuri = boxAuthorizeCode+'?response_type=code&client_id='+box.AppKey__c+'&redirect_uri=' +redirectUri; //authUri creation
-            ApexPages.PageReference uri = new PageReference(authuri);
-            Map<string, string> jsonValues = new Map<string, string>();
-            if(String.isBlank(refreshToken)){
-                aura.redirect(uri);
-            }
-            IntegrationWrapperClass res = boxServiceClass.getAccessTokenFromRefershToken(clientId,clientSecret,refreshToken);
-            if(res.responseStatusCode=='200'){
-                jsonValues= parseBOdy(res.responseBody);
-            }
-            else if(res.responseStatusCode == '401'  || res.responseStatusCode == '400'){
-                aura.redirect(uri);
-            }
-            else{
-                throw new AuraHandledException(res.responseBody);
-            }
+    public static Map<String, String> accessTokenWithRefreshToken(String clientId, String clientSecret, String refreshToken, String email) {
+        IntegrationAssignment__mdt box = getMetaData();
+        String authuri = boxAuthorizeCode + '?response_type=code&client_id=' + box.AppKey__c + '&redirect_uri=' + redirectUri;
+        Map<String, String> jsonValues = new Map<String, String>();
+        if (String.isBlank(refreshToken)) {
+            jsonValues.put('redirectUrl', authuri); 
             return jsonValues;
         }
-        catch (Exception e) {
-            throw new AuraHandledException(e.getMessage());
+        IntegrationWrapperClass res = boxServiceClass.getAccessTokenFromRefershToken(clientId, clientSecret, refreshToken);
+        if (res.responseStatusCode == '200') {
+            jsonValues = parseBody(res.responseBody);
         }
+        else if (res.responseStatusCode == '400' || res.responseStatusCode == '401') {
+            jsonValues.put('redirectUrl', authuri); 
+        }
+        return jsonValues;
     }
+    
 
     @AuraEnabled
     public static List<BoxItem> getFilesANdFolders(String accessToken, String currentFolder, Boolean isNew, String email){
@@ -147,17 +142,20 @@ public with sharing class boxController {
             IntegrationAssignment__mdt box = getMetaData();
             IntegrationWrapperClass response;
             List<BoxItem> data = new List<BoxItem>();
+            if(String.isBlank(currentFolder) || currentFolder == 'root'){
+                currentFolder = '0';
+            }
             if(String.isBlank(accessToken)){
                 accessToken = tokens.Access_Token__c;
             }
             if(isNew){
                 response = boxServiceClass.getfilesFolders(accessToken,currentFolder); 
             }
-            else if(tokens.Expire_In_Time__c < System.now()||tokens.Access_Token__c==null){
-                Map<string, string> jsonValues = accessTokenWithRefreshToken(box.AppKey__c,box.AppSecret__c,tokens.Refresh_Token__c,email);
-                response = boxServiceClass.getfilesFolders(jsonValues.get('access_token'),currentFolder); 
-                saveToken(jsonValues.get('access_token'),jsonValues.get('refresh_token'),jsonValues.get('expires_in'),tokens.user_mail__c);
-            }
+            // else if(tokens.Expire_In_Time__c < System.now()||tokens.Access_Token__c==null){
+            //     Map<string, string> jsonValues = accessTokenWithRefreshToken(box.AppKey__c,box.AppSecret__c,tokens.Refresh_Token__c,email);
+            //     response = boxServiceClass.getfilesFolders(jsonValues.get('access_token'),currentFolder); 
+            //     saveToken(jsonValues.get('access_token'),jsonValues.get('refresh_token'),jsonValues.get('expires_in'),tokens.user_mail__c);
+            // }
             else{
                 response = boxServiceClass.getfilesFolders(accessToken,currentFolder); 
             }
@@ -165,10 +163,10 @@ public with sharing class boxController {
                 system.debug(response.responseBody);
                 data = getData(response.responseBody);
                 system.debug(data);
-            } else if(response.responseStatusCode == '401') {
-                Map<string, string> jsonValues = accessTokenWithRefreshToken(box.AppKey__c,box.AppSecret__c,tokens.Refresh_Token__c,email);
-                data = getFilesANdFolders(jsonValues.get('access_token'),currentFolder,isNew,email);
-                saveToken(jsonValues.get('access_token'),jsonValues.get('refresh_token'),jsonValues.get('expires_in'),tokens.user_mail__c);
+            // } else if(response.responseStatusCode == '401') {
+            //     Map<string, string> jsonValues = accessTokenWithRefreshToken(box.AppKey__c,box.AppSecret__c,tokens.Refresh_Token__c,email);
+            //     data = getFilesANdFolders(jsonValues.get('access_token'),currentFolder,isNew,email);
+            //     saveToken(jsonValues.get('access_token'),jsonValues.get('refresh_token'),jsonValues.get('expires_in'),tokens.user_mail__c);
             }
             else {
                 throw new AuraHandledException(response.responseBody);
@@ -248,7 +246,9 @@ public with sharing class boxController {
                 return 'video';
             }else if(extension == 'htm' || extension == 'html'){
                 return 'html';
-            } else {
+            }else if(extension == 'xlsx' || extension == 'xls'){
+                return 'excel';
+            }else {
                 return 'unknown';
             }
         }

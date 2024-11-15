@@ -5,6 +5,7 @@ import getAccessToken from '@salesforce/apex/BoxController.getAccessToken';
 // import getAllAccMailIds from '@salesforce/apex/BoxController.getAllAccMailIds';
 import getFilesANdFolders from '@salesforce/apex/boxController.getFilesANdFolders';
 import userDetails from '@salesforce/apex/boxController.userDetails';
+import accessTokenWithRefreshToken from '@salesforce/apex/boxController.accessTokenWithRefreshToken';
 
 export default class BoxIntegration extends LightningElement {
     myCustomIconUrl = boxIconResource;
@@ -17,7 +18,13 @@ export default class BoxIntegration extends LightningElement {
     @track username;
     @track recordsPresent;
     @track folderAndFile;
-    @track isEmpty;
+    @track isNotEmpty;
+    @track expiresTime;
+    @track refreshToken;
+    @track fetchedAccessToken;
+    @track createFolderModal = false;
+    clientId = 'mym7rb5cn43lnz9tnzd0gl6l65w0da9l';
+    clientSecret = 'uzuMt3CPI2e2QarxKwy8UZwdBzW0h5nd';
 
     connectedCallback() {
         console.log('111---');
@@ -45,6 +52,12 @@ export default class BoxIntegration extends LightningElement {
                     }
                     else if(key == 'haveAccessToken'){
                         this.fetchedAccessToken = jsonResponse[key];
+                    }
+                    else if(key == 'expiresIn'){
+                        this.expiresTime = jsonResponse[key];
+                    }
+                    else if(key == 'refreshtoken'){
+                        this.refreshToken = jsonResponse[key];
                     }
                     else{
                         this.email=jsonResponse[key];
@@ -122,18 +135,38 @@ export default class BoxIntegration extends LightningElement {
         this.isLoading=true;
         let currentFolder = this.path[this.path.length-1].value;
         console.log(this.email);
+        console.log(this.refreshToken);
+        console.log(this.expiresTime);
+        let currentTime = new Date().toISOString();
+        console.log(currentTime);
+        if (currentTime > this.expiresTime) {
+            accessTokenWithRefreshToken({ 
+                clientId: this.clientId,
+                clientSecret: this.clientSecret,
+                refreshToken: this.refreshToken,
+                email: this.email
+            })
+            .then(result => {
+                if (result.redirectUrl) {
+                    window.location.href = result.redirectUrl;
+                } else {
+                    console.log('Access token response:', result);
+                }
+            })
+        }
         getFilesANdFolders({accessToken : '', currentFolder : currentFolder, isNew : false, email:this.email})
         .then(result=>{
+            console.log(result);
             if(result.length > 0){
                 if(result[0].redirectUri){
                     window.location.href = result[0].redirectUri;
                 }
                 this.folderAndFile = result;
                 console.log('total no of object-->',result.length);  
-                this.isEmpty = false;      
+                this.isNotEmpty = true;      
             }
             else{
-                this.isEmpty = true;
+                this.isNotEmpty = false;
             }
             console.log(this.email);
             this.isLoading = false;
@@ -145,6 +178,7 @@ export default class BoxIntegration extends LightningElement {
     }
 
     handleDivClick(event) {
+        let currentFolder = this.path[this.path.length-1].value;
         const div = event.currentTarget;
         if (this.lastClickedDiv && this.lastClickedDiv !== div) {
             this.lastClickedDiv.classList.remove('highlighted');
@@ -152,5 +186,42 @@ export default class BoxIntegration extends LightningElement {
         div.classList.toggle('highlighted');
         this.lastClickedDiv = div;
         console.log("Div clicked, performing action...");
+        let folderId = event.currentTarget.dataset.id;
+        console.log(folderId);
+        if(folderId == 'files-section'){
+            this.getRelatedFiles(folderId, currentFolder);
+            console.log('all files');
+        }
+        else if(folderId == 'photos-section'){
+            this.getRelatedFiles(folderId, currentFolder);
+            console.log('all photos');
+        }
+        else if(folderId == 'videos-section'){
+            this.getRelatedFiles(folderId, currentFolder);
+            console.log('all videos');
+        }
+        else if(folderId == 'documents-section'){
+            this.getRelatedFiles(folderId, currentFolder);
+            console.log('all documents');
+        }
+        else{
+            this.showCurrentFoldersAndFiles();
+        }
     }
+
+    getRelatedFiles(folderId, currentFolder) {
+        const allFiles = getFilesANdFolders({accessToken : '', currentFolder : currentFolder, isNew : false, email:this.email})
+        // let result =[];
+        // allFiles.forEach(file => {
+        //     if (file.type == folderId) {
+        //         result.push(file);
+        //     }
+        // });
+        // this.folderAndFile = result;
+    }
+
+    createFolderInBox(){
+        this.createFolderModal = true;
+    }
+
 }
