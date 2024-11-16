@@ -126,6 +126,7 @@ public with sharing class boxController {
         IntegrationWrapperClass res = boxServiceClass.getAccessTokenFromRefershToken(clientId, clientSecret, refreshToken);
         if (res.responseStatusCode == '200') {
             jsonValues = parseBody(res.responseBody);
+            saveToken(jsonValues.get('access_token'),jsonValues.get('refresh_token'),jsonValues.get('expires_in'),email);
         }
         else if (res.responseStatusCode == '400' || res.responseStatusCode == '401') {
             jsonValues.put('redirectUrl', authuri); 
@@ -133,7 +134,6 @@ public with sharing class boxController {
         return jsonValues;
     }
     
-
     @AuraEnabled
     public static List<BoxItem> getFilesANdFolders(String accessToken, String currentFolder, Boolean isNew, String email){
         try {
@@ -148,17 +148,8 @@ public with sharing class boxController {
             if(String.isBlank(accessToken)){
                 accessToken = tokens.Access_Token__c;
             }
-            if(isNew){
-                response = boxServiceClass.getfilesFolders(accessToken,currentFolder); 
-            }
-            // else if(tokens.Expire_In_Time__c < System.now()||tokens.Access_Token__c==null){
-            //     Map<string, string> jsonValues = accessTokenWithRefreshToken(box.AppKey__c,box.AppSecret__c,tokens.Refresh_Token__c,email);
-            //     response = boxServiceClass.getfilesFolders(jsonValues.get('access_token'),currentFolder); 
-            //     saveToken(jsonValues.get('access_token'),jsonValues.get('refresh_token'),jsonValues.get('expires_in'),tokens.user_mail__c);
-            // }
-            else{
-                response = boxServiceClass.getfilesFolders(accessToken,currentFolder); 
-            }
+            System.debug(accessToken);
+            response = boxServiceClass.getfilesFolders(accessToken,currentFolder); 
             if (response.responseStatusCode == '200') {
                 system.debug(response.responseBody);
                 data = getData(response.responseBody);
@@ -167,6 +158,7 @@ public with sharing class boxController {
             //     Map<string, string> jsonValues = accessTokenWithRefreshToken(box.AppKey__c,box.AppSecret__c,tokens.Refresh_Token__c,email);
             //     data = getFilesANdFolders(jsonValues.get('access_token'),currentFolder,isNew,email);
             //     saveToken(jsonValues.get('access_token'),jsonValues.get('refresh_token'),jsonValues.get('expires_in'),tokens.user_mail__c);
+            // 
             }
             else {
                 throw new AuraHandledException(response.responseBody);
@@ -174,6 +166,77 @@ public with sharing class boxController {
             return data;
         } catch (Exception e) {
             throw new AuraHandledException(e.getMessage());
+        }
+    }
+
+    @AuraEnabled
+    public static List<BoxItem> createFolderInBox( String accessToken,String current,String fileName,String email){
+        try {
+            System.debug(current);
+            System.debug(fileName);
+            IntegrationAssignment__mdt box = getMetaData();
+            Integration_Access__c tokens=getTokens(email);
+            if(String.isBlank(current) || current == 'root'){
+                current = '';
+            }
+            if(accessToken==''||accessToken==null){
+                accessToken=tokens.Access_Token__c;
+            }
+            IntegrationWrapperClass response;
+            response = boxServiceClass.createFolderBox(accessToken,fileName,current);
+            if(response.responseStatusCode == '201'){
+                List<BoxItem> data= getFilesANdFolders(accessToken,current,false,email);
+                return data;
+            }
+            else if(response.responseStatusCode == '400'){
+                Map<string, string> jsonValues = accessTokenWithRefreshToken(box.AppKey__c,box.AppSecret__c,tokens.Refresh_Token__c,email);
+                accessToken=jsonValues.get('access_token');
+                List<BoxItem> data= createFolderInBox(accessToken,current,fileName,email);
+                saveToken(jsonValues.get('access_token'),jsonValues.get('refresh_token'),jsonValues.get('expires_in'),email);
+                return data;
+            }
+            else{
+                throw new AuraHandledException(response.responseBody);
+            }
+        } catch (Exception e) {
+            throw new AuraHandledException( e.getMessage());
+        }
+    }
+
+    @AuraEnabled
+    public static Boolean uploadFile(String accessToken,String mimeType, String current, String fileName, String fileContent, String email) {
+        String errorMessage = '';
+        try {
+            IntegrationAssignment__mdt box = getMetaData();
+            Integration_Access__c tokens = getTokens(email);
+            if(String.isBlank(current) || current == 'root'){
+                current = '';
+            }
+            if(accessToken == '' || accessToken == null){
+                accessToken = tokens.Access_Token__c;
+            }
+            IntegrationWrapperClass response;
+            response = boxServiceClass.uploadFile(accessToken, fileName, fileContent, current, mimeType);
+            if(response.responseStatusCode == '201'){
+                return true;
+            }
+            else if(response.responseStatusCode == '400'){
+                Map<string, string> jsonValues = accessTokenWithRefreshToken(box.AppKey__c, box.AppSecret__c, tokens.Refresh_Token__c,email);
+                accessToken = jsonValues.get('access_token');
+                Boolean data = uploadFile(accessToken, mimeType, current, fileName, fileContent,email);
+                saveToken(jsonValues.get('access_token'), jsonValues.get('refresh_token'), jsonValues.get('expires_in'),email);
+                return data;
+            }
+            else{
+                Map<String, Object> jsonMap = (Map<String, Object>) JSON.deserializeUntyped(response.responseBody);
+                errorMessage = (String) jsonMap.get('message');
+                throw new AuraHandledException(errorMessage);
+            }
+        } catch (Exception e) {
+            if(String.isBlank(errorMessage)){
+                errorMessage = e.getMessage();
+            }
+            throw new AuraHandledException(errorMessage);
         }
     }
 

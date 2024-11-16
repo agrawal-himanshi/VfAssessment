@@ -4,7 +4,10 @@ import createAuthURL from '@salesforce/apex/boxController.createAuthURL';
 import getAccessToken from '@salesforce/apex/BoxController.getAccessToken';
 // import getAllAccMailIds from '@salesforce/apex/BoxController.getAllAccMailIds';
 import getFilesANdFolders from '@salesforce/apex/boxController.getFilesANdFolders';
-import userDetails from '@salesforce/apex/boxController.userDetails';
+//import userDetails from '@salesforce/apex/boxController.userDetails';
+import createFolderInBox from '@salesforce/apex/boxController.createFolderInBox';
+import uploadFile from '@salesforce/apex/boxController.uploadFile';
+//import deleteFileFolder from '@salesforce/apex/boxController.deleteFileFolder';
 import accessTokenWithRefreshToken from '@salesforce/apex/boxController.accessTokenWithRefreshToken';
 
 export default class BoxIntegration extends LightningElement {
@@ -23,6 +26,11 @@ export default class BoxIntegration extends LightningElement {
     @track refreshToken;
     @track fetchedAccessToken;
     @track createFolderModal = false;
+    @track newFolderName = '';
+    @track fileNameFromUi = '';
+    @track fileContentFromUi;
+    @track folderName;
+
     clientId = 'mym7rb5cn43lnz9tnzd0gl6l65w0da9l';
     clientSecret = 'uzuMt3CPI2e2QarxKwy8UZwdBzW0h5nd';
 
@@ -140,6 +148,7 @@ export default class BoxIntegration extends LightningElement {
         let currentTime = new Date().toISOString();
         console.log(currentTime);
         if (currentTime > this.expiresTime) {
+            console.log('go to take accessToken from Refresh Token');
             accessTokenWithRefreshToken({ 
                 clientId: this.clientId,
                 clientSecret: this.clientSecret,
@@ -150,32 +159,59 @@ export default class BoxIntegration extends LightningElement {
                 if (result.redirectUrl) {
                     window.location.href = result.redirectUrl;
                 } else {
+                    console.log('in else');
                     console.log('Access token response:', result);
+                    getFilesANdFolders({accessToken : '', currentFolder : currentFolder, isNew : false, email:this.email})
+                    .then(result=>{
+                        console.log(result);
+                        if(result.length > 0){
+                            if(result[0].redirectUri){
+                                window.location.href = result[0].redirectUri;
+                            }
+                            this.folderAndFile = result;
+                            console.log('total no of object-->',result.length);  
+                            this.isNotEmpty = true;      
+                        }
+                        else{
+                            this.isNotEmpty = false;
+                        }
+                        console.log(this.email);
+                        this.isLoading = false;
+                    })
+                    .catch(error => {
+                        this.isLoading=false
+                        //this.showToast('Error', error.body.message, 'error');
+                    });
                 }
             })
         }
-        getFilesANdFolders({accessToken : '', currentFolder : currentFolder, isNew : false, email:this.email})
-        .then(result=>{
-            console.log(result);
-            if(result.length > 0){
-                if(result[0].redirectUri){
-                    window.location.href = result[0].redirectUri;
+        else {
+            console.log('in main else');
+            
+            getFilesANdFolders({accessToken : '', currentFolder : currentFolder, isNew : false, email:this.email})
+            .then(result=>{
+                console.log(result);
+                if(result.length > 0){
+                    if(result[0].redirectUri){
+                        window.location.href = result[0].redirectUri;
+                    }
+                    this.folderAndFile = result;
+                    console.log('total no of object-->',result.length);  
+                    this.isNotEmpty = true;      
                 }
-                this.folderAndFile = result;
-                console.log('total no of object-->',result.length);  
-                this.isNotEmpty = true;      
-            }
-            else{
-                this.isNotEmpty = false;
-            }
-            console.log(this.email);
-            this.isLoading = false;
-        })
-        .catch(error => {
-            this.isLoading=false
-            this.showToast('Error', error.body.message, 'error');
-        });
-    }
+                else{
+                    this.isNotEmpty = false;
+                }
+                console.log(this.email);
+                this.isLoading = false;
+            })
+            .catch(error => {
+                this.isLoading=false
+                //this.showToast('Error', error.body.message, 'error');
+            });
+        }
+
+        }
 
     handleDivClick(event) {
         let currentFolder = this.path[this.path.length-1].value;
@@ -223,5 +259,192 @@ export default class BoxIntegration extends LightningElement {
     createFolderInBox(){
         this.createFolderModal = true;
     }
+
+    uploadFileToBox(){
+        this.uploadFileModal = true;
+    }
+
+    hideCreateFolderModal() {
+        this.createFolderModal = false;
+        this.newFolderName = ''; 
+    }
+
+    handleFolderNameChange(event) {
+        this.newFolderName = event.detail.value;
+        console.log(this.newFolderName); 
+    }
+
+    createFolder() {
+        this.isLoading = true;
+        let currentFolderFromUi = this.path[this.path.length-1].value;
+        console.log(currentFolderFromUi);
+        console.log(this.newFolderName); 
+        createFolderInBox({accessToken : '', fileName : this.newFolderName, current : currentFolderFromUi, email:this.email})
+            .then(result=>{
+                this.isLoading = false;
+                this.showCurrentFoldersAndFiles();
+                this.hideCreateFolderModal();
+            })
+        .catch(error => {
+            this.isLoading = false;
+            // this.showToast('Error', error.body.message, 'error');
+        });
+    }
+
+    hideUploadFolderModal(){
+        this.uploadFileModal = false;
+    }
+
+    onUpload(event) {
+        const file = event.target.files[0];
+        console.log(file);
+        if (file) {
+            this.fileNameFromUi = file.name; 
+            this.type = file.type;
+            const reader = new FileReader();
+            reader.onload = () => {
+                this.fileContentFromUi = reader.result.split(',')[1];
+                console.log(this.fileContentFromUi);
+            };
+            reader.readAsDataURL(file);
+        }
+        console.log(this.fileNameFromUi);
+        console.log(this.type);
+    }
+    
+    uploadFile() {
+        const currentFolder = this.path[this.path.length - 1].value;
+        console.log(currentFolder);
+        console.log(this.type);
+        console.log(this.fileContentFromUi);
+        if (this.fileContentFromUi) {
+            this.isLoading = true;
+            uploadFile({ accessToken : '', mimeType: this.type, current : currentFolder, fileName : this.fileNameFromUi,  fileContent : this.fileContentFromUi, email: this.email })
+            .then(result => {
+                console.log('Hi');
+                console.log(result);
+                //this.showToast('Success', 'File Uploaded Successfully', 'success');
+                this.fileNameFromUi = '';
+                this.fileContentFromUi = null;
+                this.type = '';
+                this.isLoading = false; 
+                this.showCurrentFoldersAndFiles();  
+                this.hideUploadFolderModal();            
+            })
+            .catch(error => {
+                this.isLoading=false;
+                //this.showToast('Error', error.body.message, 'error');
+            });
+        } else {
+            console.log('error');
+            //this.showToast('Warning','Please select a file to upload.','warning');
+        }
+    }
+
+    openFolder(event) {
+        this.isLoading = true;
+        console.log(event);
+        let currentFolder = event.currentTarget.dataset.id;
+        console.log(currentFolder);
+        let folderName = event.currentTarget.title;
+        console.log(folderName);
+        getFilesANdFolders({accessToken : '', currentFolder : currentFolder, isNew : false, email:this.email})
+        .then(result=>{
+            this.folderAndFile = result.map(record => {
+                console.log(record.fileType);
+                if (record.fileType === 'folder') {
+                    record.isFolderfromhere = true;
+                } else {
+                    record.isFolderfromhere = false;
+                }
+                console.log(record.isFolderfromhere);
+                let iconNameFromMethod;
+                iconNameFromMethod = this.getIconNameForMimeType(record.fileType);
+                console.log(iconNameFromMethod);
+                return {
+                    ...record,
+                    isFolder: Boolean(record.isFolderfromhere),
+                    iconName: iconNameFromMethod,
+                };
+            });
+            this.folderAndFileLength = this.folderAndFile?.length ?? 0;
+            console.log('total no of object-->',this.folderAndFileLength);        
+            this.isLoading = false;
+            let path = this.path;
+            path.push({ label : folderName, value : currentFolder });
+            this.path = path;
+        })
+        .catch(error => {
+            this.isLoading=false
+            this.showToast('Error', error.body.message, 'error');
+        });
+    }
+
+    deleteFile(event) {
+        console.log('in delete file');
+        this.isLoading = true;
+        let folderId = event.currentTarget.dataset.id;
+        console.log(folderId);
+        let type = event.currentTarget.dataset.type;
+        console.log(type);
+        let currentFolder = this.path[this.path.length - 1].value;
+        let fileType = 'files';
+        if(type === 'true'){
+            fileType = 'folders'; 
+        }
+        deleteFileOrFolder({accessToken :'', current : currentFolder, fileId : folderId, type : fileType , email : this.email})
+        .then(result => {
+            console.log(result);
+            if(result == true){
+                this.showToast('Success', 'Deletion Successful', 'success');
+                this.isLoading = false;
+                this.showCurrentFoldersAndFiles();
+            }
+        })
+        .catch(error => {
+            this.isLoading = false;
+            this.showToast('Error', error.body.message, 'error');
+        });
+    }
+
+    handlePath(event) {
+        const folderPath = event.target.dataset.value;
+        this.isLoading = true; 
+        const index = this.path.findIndex(item => item.value === folderPath);
+        if (index === -1 || index === this.path.length - 1) {
+            this.isLoading = false;
+            return;
+        }
+        getFilesANdFolders({accessToken : '', currentFolder : folderPath, isNew : false, email:this.email})
+        .then(result=>{
+            this.folderAndFile = result.map(record => {
+                console.log(record.fileType);
+                if (record.fileType === 'folder') {
+                    record.isFolderfromhere = true;
+                } else {
+                    record.isFolderfromhere = false;
+                }
+                console.log(record.isFolderfromhere);
+                let iconNameFromMethod;
+                iconNameFromMethod = this.getIconNameForMimeType(record.fileType);
+                console.log(iconNameFromMethod);
+                return {
+                    ...record,
+                    isFolder: Boolean(record.isFolderfromhere),
+                    iconName: iconNameFromMethod,
+                };
+            });
+            this.folderAndFileLength = this.folderAndFile?.length ?? 0;
+            console.log('total no of object-->',this.folderAndFileLength);        
+            const path = this.path.slice(0, index + 1);
+            this.path = path;
+            this.isLoading = false;
+        })
+        .catch(error => {
+            this.isLoading = false
+            this.showToast('Error', error.body.message, 'error');
+        });
+    }
+
 
 }

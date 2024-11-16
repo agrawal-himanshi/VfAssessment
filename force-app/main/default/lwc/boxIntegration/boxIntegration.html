@@ -70,27 +70,47 @@
                         <div class="slds-grid header">
                             <lightning-icon icon-name="doctype:folder" alternative-text="folder" size="small" class="slds-m-right_x-small"></lightning-icon>
                             <h2>Create Folder</h2>
-                            <lightning-icon icon-name="utility:close" alternative-text="close" size="small" class="slds-m-right_x-small" onclick={closeModal} style="margin-left:400px"></lightning-icon>
+                            <lightning-icon icon-name="utility:close" alternative-text="close" size="small" class="slds-m-right_x-small" onclick={hideCreateFolderModal} style="margin-left:400px"></lightning-icon>
                         </div>
                         <div class="slds-grid slds-grid_align-center">
                             <lightning-input type="text" label="Folder Name" value={folderName} onchange={handleFolderNameChange}></lightning-input>
                         </div>
                         <div class="slds-grid slds-grid_align-center" style="margin-top: 20px;">
-                            <lightning-button label="Cancel" onclick={closeModal}></lightning-button>
-                            <lightning-button label="Create" onclick={createNewFolder}></lightning-button>
+                            <lightning-button label="Cancel" onclick={hideCreateFolderModal}></lightning-button>
+                            <lightning-button label="Create" onclick={createFolder}></lightning-button>
+                        </div>
+                    </div>
+                </template>
+                <template if:true={uploadFileModal}>
+                    <div class="slds-fade-in-open createModal">
+                        <div class="slds-grid header">
+                            <lightning-icon icon-name="doctype:folder" alternative-text="folder" size="small" class="slds-m-right_x-small"></lightning-icon>
+                            <h2>Upload Folder</h2>
+                            <lightning-icon icon-name="utility:close" alternative-text="close" size="small" class="slds-m-right_x-small" onclick={hideUploadFolderModal} style="margin-left:400px"></lightning-icon>
+                        </div>
+                        <div class="slds-grid slds-grid_align-center">
+                            <lightning-input type="file" label="Upload File" onchange={onUpload}></lightning-input>
+                            <span class="uploaded-file-name">{fileNameFromUi}</span>
+                        </div>
+                        <div class="slds-grid slds-grid_align-center" style="margin-top: 20px;">
+                            <lightning-button label="Cancel" onclick={hideUploadFolderModal}></lightning-button>
+                            <lightning-button label="Create" onclick={uploadFile}></lightning-button>
                         </div>
                     </div>
                 </template>
                 <template if:true={recordsPresent}>
                     <template if:true={isNotEmpty}>
-                        <div style="overflow: scroll;">
+                        <div style="overflow: auto; max-height: 400px; max-width: 100%; overflow-x: auto; overflow-y: auto;">
+                            <!-- Table Header -->
                             <div class="table-header slds-grid">
                                 <div class="slds-col" style="width: 50px;"></div>
                                 <div class="slds-col" style="width: 50%;"><div class="slds-truncate">File/Folder</div></div>
                                 <div class="slds-col slds-text-align_center">Download</div>
                                 <div class="slds-col slds-text-align_center" style="margin-left: 80px;">Delete</div>
                             </div>
-                            <div class="table-body">
+                            
+                            <!-- Table Body (Scrollable Content) -->
+                            <div class="table-body" style="overflow: auto; max-height: 300px; display: block;">
                                 <template for:each={folderAndFile} for:item="record">
                                     <div key={record.id} class="slds-hint-parent slds-grid table-row" data-id={record.id} data-name={record.name} data-type={record.type}>
                                         <div class="slds-col" style="width: 50px;">
@@ -109,15 +129,20 @@
                                                 <a class="slds-truncate slds-m-right_small" title="Download" onclick={deleteFile}>
                                                     <lightning-icon icon-name="action:download"></lightning-icon>
                                                 </a>
+                                                <a class="slds-truncate slds-m-right_small" title="Delete" data-id={record.fileId} data-type={record.isFolder} onclick={deleteFile} style="margin-left: 120px;">
+                                                    <lightning-icon icon-name="action:delete"></lightning-icon>
+                                                </a>
                                             </template>
-                                            <a class="slds-truncate slds-m-right_small" title="Delete" data-id={record.fileId} data-type={record.isFolder} onclick={deleteFile} style="margin-left: 120px;">
-                                             <lightning-icon icon-name="action:delete"></lightning-icon>
-                                            </a>                                        
+                                            <template if:false={record.isDownloadable}>
+                                                <a class="slds-truncate slds-m-right_small" title="Delete" data-id={record.fileId} data-type={record.isFolder} onclick={deleteFile} style="margin-left: 178px;">
+                                                    <lightning-icon icon-name="action:delete"></lightning-icon>
+                                                </a>
+                                            </template>                                        
                                         </div>
                                     </div>
                                 </template>
                             </div>
-                        </div>                                     
+                        </div>
                     </template>
                     <template if:false={isNotEmpty}>
                         <div class="slds-grid slds-grid_align-center slds-grid_vertical-align-center">

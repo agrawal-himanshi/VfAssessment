@@ -264,7 +264,7 @@ public with sharing class driveController {
     public static Boolean uploadFile(String accessToken,String mimeType, String current, String fileName, String fileContent, String email) {
         String errorMessage = '';
         try {
-            IntegrationAssignment__mdt box = getMetaData();
+            IntegrationAssignment__mdt googleDrive = getMetaData();
             Integration_Access__c tokens = getTokens(email);
             if(String.isBlank(current) || current == 'root'){
                 current = '';
@@ -274,7 +274,7 @@ public with sharing class driveController {
             }
             IntegrationWrapperClass response;
             if(tokens.Expire_In_Time__c < System.now()){
-                Map<string, string> jsonValues = accessTokenWithRefreshToken(box.AppKey__c, box.AppSecret__c, tokens.Refresh_Token__c,email);
+                Map<string, string> jsonValues = accessTokenWithRefreshToken(googleDrive.AppKey__c, googleDrive.AppSecret__c, tokens.Refresh_Token__c,email);
                 accessToken = jsonValues.get('access_token');
                 response = GoogleDriveServiceClass.uploadFile(accessToken, fileName, fileContent, current, mimeType);
                 saveToken(jsonValues.get('access_token'), jsonValues.get('refresh_token'), jsonValues.get('expires_in'),email);
@@ -286,7 +286,7 @@ public with sharing class driveController {
                 return true;
             }
             else if(response.responseStatusCode == '401'){
-                Map<string, string> jsonValues = accessTokenWithRefreshToken(box.AppKey__c, box.AppSecret__c, tokens.Refresh_Token__c,email);
+                Map<string, string> jsonValues = accessTokenWithRefreshToken(googleDrive.AppKey__c, googleDrive.AppSecret__c, tokens.Refresh_Token__c,email);
                 accessToken = jsonValues.get('access_token');
                 Boolean data = uploadFile(accessToken, mimeType, current, fileName, fileContent,email);
                 saveToken(jsonValues.get('access_token'), jsonValues.get('refresh_token'), jsonValues.get('expires_in'),email);
