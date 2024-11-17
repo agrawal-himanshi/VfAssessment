@@ -170,6 +170,95 @@ public with sharing class boxController {
     }
 
     @AuraEnabled
+    public static Boolean deleteFileOrFolder( String accessToken, String fileId, String type, String email) {
+        String errorMessage = '';
+        try {
+            Integration_Access__c tokens = getTokens(email);
+            IntegrationAssignment__mdt box = getMetaData();
+            if(accessToken == '' || accessToken == null){
+                accessToken = tokens.Access_Token__c;
+            }
+            IntegrationWrapperClass response;
+            response = boxServiceClass.deleteFileOrFolder(accessToken, fileId, type);
+            if(response.responseStatusCode == '204'){
+                return true;
+            }
+            else{
+                Map<String, Object> jsonMap = (Map<String, Object>) JSON.deserializeUntyped(response.responseBody);
+                errorMessage = (String) jsonMap.get('message');
+                throw new AuraHandledException(errorMessage);
+            }
+        } catch (Exception e) {
+            if(String.isBlank(errorMessage)){
+                errorMessage = e.getMessage();
+            }
+            throw new AuraHandledException(errorMessage);
+        }
+    }
+
+    /*
+        download a file
+        List<BoxItem> 
+    */
+    @AuraEnabled
+    public static String  downloadFile(String accessToken, String fileId, String email) {
+        String errorMessage = '';
+        try {
+            Integration_Access__c tokens = getTokens(email);
+            IntegrationAssignment__mdt box = getMetaData();
+            if(accessToken == '' || accessToken == null){
+                accessToken = tokens.Access_Token__c;
+            }
+            IntegrationWrapperClass response;
+            response = BoxServiceClass.downloadFile(accessToken, fileId);
+            if(response.responseStatusCode == '302'){
+                return response.responseHeader;
+            }
+            else{
+                Map<String, Object> jsonMap = (Map<String, Object>) JSON.deserializeUntyped(response.responseBody);
+                errorMessage = (String) jsonMap.get('message'); 
+                throw new AuraHandledException(errorMessage);
+            }
+        } catch (Exception e) {
+            if(String.isBlank(errorMessage)){
+                errorMessage = e.getMessage();
+            }
+            throw new AuraHandledException(errorMessage);
+        }
+    }
+
+    /*
+        preview a file
+        List<BoxItem> 
+    */
+    @AuraEnabled
+    public static String  previewFile( String accessToken, String fileId, String email){
+        String errorMessage = '';
+        try {
+            Integration_Access__c tokens = getTokens(email);
+            IntegrationAssignment__mdt box = getMetaData();
+            if(accessToken == '' || accessToken == null){
+                accessToken = tokens.Access_Token__c;
+            }
+            IntegrationWrapperClass response;
+            response = boxServiceClass.previewFile(accessToken, fileId);
+            if(response.responseStatusCode == '200'){
+                return parseBOdy(response.responseBody).get('url');
+            }
+            else{
+                Map<String, Object> jsonMap = (Map<String, Object>) JSON.deserializeUntyped(response.responseBody);
+                errorMessage = (String) jsonMap.get('message');
+                throw new AuraHandledException(errorMessage);
+            }  
+        } catch (Exception e) {
+            if(String.isBlank(errorMessage)){
+                errorMessage = e.getMessage();
+            }
+            throw new AuraHandledException(errorMessage);
+        }
+    }
+
+    @AuraEnabled
     public static List<BoxItem> createFolderInBox( String accessToken,String current,String fileName,String email){
         try {
             System.debug(current);
@@ -204,34 +293,28 @@ public with sharing class boxController {
     }
 
     @AuraEnabled
-    public static Boolean uploadFile(String accessToken,String mimeType, String current, String fileName, String fileContent, String email) {
+    public static Boolean uploadFileBox(String accessToken, String current, String fileName, String fileContent, String email) {
         String errorMessage = '';
         try {
             IntegrationAssignment__mdt box = getMetaData();
             Integration_Access__c tokens = getTokens(email);
             if(String.isBlank(current) || current == 'root'){
-                current = '';
+                current = '0';
             }
             if(accessToken == '' || accessToken == null){
                 accessToken = tokens.Access_Token__c;
             }
             IntegrationWrapperClass response;
-            response = boxServiceClass.uploadFile(accessToken, fileName, fileContent, current, mimeType);
+            response = BoxServiceClass.uploadFile(accessToken, fileName, fileContent, current);
             if(response.responseStatusCode == '201'){
                 return true;
-            }
-            else if(response.responseStatusCode == '400'){
-                Map<string, string> jsonValues = accessTokenWithRefreshToken(box.AppKey__c, box.AppSecret__c, tokens.Refresh_Token__c,email);
-                accessToken = jsonValues.get('access_token');
-                Boolean data = uploadFile(accessToken, mimeType, current, fileName, fileContent,email);
-                saveToken(jsonValues.get('access_token'), jsonValues.get('refresh_token'), jsonValues.get('expires_in'),email);
-                return data;
             }
             else{
                 Map<String, Object> jsonMap = (Map<String, Object>) JSON.deserializeUntyped(response.responseBody);
                 errorMessage = (String) jsonMap.get('message');
                 throw new AuraHandledException(errorMessage);
             }
+            
         } catch (Exception e) {
             if(String.isBlank(errorMessage)){
                 errorMessage = e.getMessage();
@@ -239,7 +322,7 @@ public with sharing class boxController {
             throw new AuraHandledException(errorMessage);
         }
     }
-
+    
     public class BoxItem {
         @AuraEnabled 
         public String id ;

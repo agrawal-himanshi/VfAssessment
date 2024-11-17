@@ -68,11 +68,6 @@
     width: 110px; 
 }
 
-/* .custom-table {
-    margin: 0;
-    padding: 0;
-} */
-
 .table-header {
     padding: 10px;
 }
@@ -104,13 +99,15 @@
     transition: opacity 0.3s ease-in-out;  */
     width: 550px;
     background-color: #f4f6f9;
+    padding: 20px;
 }
 
 header{
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    margin-left: 10px;
+    margin-bottom: 20px;
+    padding-top: 20px;
 }
+
 
 
 

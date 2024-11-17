@@ -104,6 +104,58 @@ public with sharing class boxServiceClass {
         return new IntegrationWrapperClass(response.getBody(), String.valueOf(response.getStatusCode()));
     }
 
+    public static IntegrationWrapperClass deleteFileOrFolder(String accessToken, String itemId, String type) {
+        HttpRequest req = new HttpRequest();
+        String url = '';
+        System.debug(type);
+        System.debug('to delete');        
+        if (type == 'folders') {
+            System.debug('in folder delete');
+            url = 'https://api.box.com/2.0/folders/' + itemId + '?recursive=true'; // URL to delete a folder (recursive)
+        } else {
+            url = 'https://api.box.com/2.0/files/' + itemId; // URL to delete a file
+        }
+        req.setMethod('DELETE');
+        req.setEndpoint(url);
+        req.setHeader('Authorization', 'Bearer ' + accessToken);
+        Http http = new Http();
+        HttpResponse response = http.send(req);
+        if (response.getStatusCode() == 204) {
+            return new IntegrationWrapperClass('Success', String.valueOf(response.getStatusCode()));
+        } else {
+            return new IntegrationWrapperClass('Error: ' + response.getBody(), String.valueOf(response.getStatusCode()));
+        }
+    }
+   
+    public static IntegrationWrapperClass downloadFile(String accessToken, String fileId){
+        HttpRequest req = new HttpRequest();
+        String url = filesEndpoint+'/files/'+fileId+'/content';
+        req.setMethod('GET');
+        req.setEndpoint(url);
+        req.setHeader('Authorization', 'Bearer ' + accessToken);
+        Http http = new Http();
+        HttpResponse response = http.send(req);
+        return new IntegrationWrapperClass(response.getBody(), String.valueof(response.getStatusCode()), response.getHeader('location'));
+
+    }
+
+    /*
+        preview file
+        IntegrationWrapperClass 
+    */
+    public static IntegrationWrapperClass previewFile(String accessToken, String fileId){
+        HttpRequest req = new HttpRequest();
+        String url = filesEndpoint+'/files/'+fileId+'?fields=expiring_embed_link';
+        req.setMethod('GET');
+        req.setEndpoint(url);
+        req.setHeader('Authorization', 'Bearer ' + accessToken);
+        req.setHeader('Content-Type', 'application/json');
+        Http http = new Http();
+        HttpResponse response = http.send(req);
+        return new IntegrationWrapperClass(response.getBody(), String.valueof(response.getStatusCode()), response.getHeader('location'));
+
+    }
+
     public static IntegrationWrapperClass uploadFile(String accessToken, String fileName, String fileContent, String parentFolderId){
         Blob base64EncodeFile = base64EncodeFileContent(EncodingUtil.base64Decode(fileContent), fileName);
         String uploadEndPointURL = uploadFileToBox+'?parent_id='+parentFolderId;

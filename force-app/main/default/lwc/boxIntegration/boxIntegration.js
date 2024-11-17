@@ -6,8 +6,10 @@ import getAccessToken from '@salesforce/apex/BoxController.getAccessToken';
 import getFilesANdFolders from '@salesforce/apex/boxController.getFilesANdFolders';
 //import userDetails from '@salesforce/apex/boxController.userDetails';
 import createFolderInBox from '@salesforce/apex/boxController.createFolderInBox';
-import uploadFile from '@salesforce/apex/boxController.uploadFile';
-//import deleteFileFolder from '@salesforce/apex/boxController.deleteFileFolder';
+import uploadFileBox from '@salesforce/apex/boxController.uploadFileBox';
+import deleteFileOrFolder from '@salesforce/apex/BoxController.deleteFileOrFolder';
+import previewFile from '@salesforce/apex/BoxController.previewFile';
+import downloadFile from '@salesforce/apex/BoxController.downloadFile';
 import accessTokenWithRefreshToken from '@salesforce/apex/boxController.accessTokenWithRefreshToken';
 
 export default class BoxIntegration extends LightningElement {
@@ -103,7 +105,7 @@ export default class BoxIntegration extends LightningElement {
             })      
             .catch(error => {
                 this.isLoading = false;
-                this.showToast('Error', error.body.message, 'error');
+                //this.showToast('Error', error.body.message, 'error');
             });
         }else {
             console.log('222---');
@@ -134,7 +136,7 @@ export default class BoxIntegration extends LightningElement {
             })
             .catch(error => {
                 this.isLoading=false;
-                this.showToast('Error', error.body.message, 'error');
+                //this.showToast('Error', error.body.message, 'error');
             });
         }
     }
@@ -256,6 +258,42 @@ export default class BoxIntegration extends LightningElement {
         // this.folderAndFile = result;
     }
 
+    // dowload a file
+    fileDownload(event) {
+        console.log('download link');
+        let folderId = event.currentTarget.dataset.id;    
+        console.log(folderId);  
+        downloadFile({accessToken : '', fileId : folderId, email:this.email})
+        .then(result => {
+            const link = document.createElement('a');
+            link.href = result;
+            link.target = '_self';
+            link.click();
+        })
+        .catch(error => {
+            this.isLoading = false;
+            // this.showToast('Error', error.body.message, 'error');
+        });
+    }
+
+    // preview a file 
+    filePreview(event) {
+        console.log('preview link');
+        let folderId = event.currentTarget.dataset.id;
+        console.log(folderId);
+        previewFile({accessToken : '', fileId : folderId, email:this.email})
+        .then(result => {
+                const link = document.createElement('a');
+                link.href = result;
+                link.target = '_blank';
+                link.click();
+            })
+        .catch(error => {
+            this.isLoading = false;
+            // this.showToast('Error', error.body.message, 'error');
+        });
+    }
+
     createFolderInBox(){
         this.createFolderModal = true;
     }
@@ -273,6 +311,16 @@ export default class BoxIntegration extends LightningElement {
         this.newFolderName = event.detail.value;
         console.log(this.newFolderName); 
     }
+
+    get isCreateDisabled() {
+        if(this.newFolderName ==''){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
 
     createFolder() {
         this.isLoading = true;
@@ -319,7 +367,7 @@ export default class BoxIntegration extends LightningElement {
         console.log(this.fileContentFromUi);
         if (this.fileContentFromUi) {
             this.isLoading = true;
-            uploadFile({ accessToken : '', mimeType: this.type, current : currentFolder, fileName : this.fileNameFromUi,  fileContent : this.fileContentFromUi, email: this.email })
+            uploadFileBox({ accessToken : '', mimeType: this.type, current : currentFolder, fileName : this.fileNameFromUi,  fileContent : this.fileContentFromUi, email: this.email })
             .then(result => {
                 console.log('Hi');
                 console.log(result);
@@ -376,34 +424,35 @@ export default class BoxIntegration extends LightningElement {
         })
         .catch(error => {
             this.isLoading=false
-            this.showToast('Error', error.body.message, 'error');
+            //this.showToast('Error', error.body.message, 'error');
         });
     }
 
+    // delete file
     deleteFile(event) {
-        console.log('in delete file');
         this.isLoading = true;
         let folderId = event.currentTarget.dataset.id;
-        console.log(folderId);
+        console.log('id: ' + folderId);
         let type = event.currentTarget.dataset.type;
-        console.log(type);
+        console.log(type);        
         let currentFolder = this.path[this.path.length - 1].value;
+        console.log(currentFolder);
         let fileType = 'files';
-        if(type === 'true'){
+        if(type === 'doctype:folder'){
             fileType = 'folders'; 
         }
-        deleteFileOrFolder({accessToken :'', current : currentFolder, fileId : folderId, type : fileType , email : this.email})
+        console.log(fileType);
+        deleteFileOrFolder({accessToken :'', current : currentFolder, fileId : folderId, type : fileType, email:this.email})
         .then(result => {
             console.log(result);
-            if(result == true){
-                this.showToast('Success', 'Deletion Successful', 'success');
-                this.isLoading = false;
-                this.showCurrentFoldersAndFiles();
+            if(result === true){
+                // this.showToast('Success', 'Deletion Successful', 'success');
+                this.showCurrentFoldersAndFiles();  
             }
         })
         .catch(error => {
             this.isLoading = false;
-            this.showToast('Error', error.body.message, 'error');
+            // this.showToast('Error', error.body.message, 'error');
         });
     }
 
@@ -442,7 +491,7 @@ export default class BoxIntegration extends LightningElement {
         })
         .catch(error => {
             this.isLoading = false
-            this.showToast('Error', error.body.message, 'error');
+           // this.showToast('Error', error.body.message, 'error');
         });
     }
 
