@@ -104,9 +104,11 @@ public with sharing class boxController {
                 Map<String, Object> userDetailsMap = (Map<String, Object>) JSON.deserializeUntyped(response.responseBody);
                 String username =(String) userDetailsMap.get('name');
                 String emailId = (String) userDetailsMap.get('login');
+                String profileImg = (String) userDetailsMap.get('avatar_url');
                 system.debug(username);
                 system.debug(emailId);
-                return new UserDetailsWrapper(username, emailId);
+                System.debug(profileImg);
+                return new UserDetailsWrapper(username, emailId, profileImg);
             } 
             return null; 
         } catch (Exception e) {
@@ -406,10 +408,13 @@ public with sharing class boxController {
         public String username { get; set; }
         @AuraEnabled 
         public String email { get; set; }
-    
-        public UserDetailsWrapper(String username, String email) {
+        @AuraEnabled 
+        public String profileImg { get; set; }
+
+        public UserDetailsWrapper(String username, String email, String profileImage) {
             this.username = username;
             this.email = email;
+            this.profileImg = profileImage;
         }
     }
 

@@ -21,6 +21,8 @@ export default class BoxIntegration extends LightningElement {
     @track isLoading = false;
     @track email;
     @track username;
+    @track profileImage;
+    @track viewUser = false;
     @track recordsPresent;
     @track folderAndFile;
     @track isNotEmpty;
@@ -114,9 +116,11 @@ export default class BoxIntegration extends LightningElement {
             getAccessToken({code: authcode})
             .then(result => {
                 this.email = result.email;  
-                this.username = result.username; 
+                this.username = result.username;
+                this.profileImage = result.profileImage; 
                 console.log(this.email);
                 console.log(this.username);
+                console.log(this.profileImage);
                 this.isLoading=false;
                 this.connected = true; 
                 this.recordsPresent=true;
@@ -273,13 +277,14 @@ export default class BoxIntegration extends LightningElement {
             })
             console.log('all videos');
         }
-        else if(folderId == 'documents-section'){
+        else if(folderId == 'docs-section'){
             getFilesANdFolders({accessToken : '', currentFolder : currentFolder, isNew : false, email:this.email})
             .then(allFiles=>{
                 console.log(allFiles);
                 let result =[];
                 for(let i=0;i<allFiles.length;i++){
-                    if(allFiles[i].type == "doctype:pdf" || allFiles[i].type == "doctype:doc" || allFiles[i].type == "doctype:docx" || allFiles[i].type == "doctype:ppt" || allFiles[i].type == "doctype:pptx"|| allFiles[i].type == "doctype:txt"|| allFiles[i].type == "doctype:csv"|| allFiles[i].type == "doctype:htm"||  allFiles[i].type == "doctype:html"||  allFiles[i].type == "doctype:xlsx"||  allFiles[i].type == "doctype:xls"){        
+                    console.log(allFiles[i].type);
+                    if(allFiles[i].type == "doctype:pdf" || allFiles[i].type == "doctype:doc" || allFiles[i].type == "doctype:docx" || allFiles[i].type == "doctype:ppt" || allFiles[i].type == "doctype:pptx"|| allFiles[i].type == "doctype:txt"|| allFiles[i].type == "doctype:csv"|| allFiles[i].type == "doctype:html"||  allFiles[i].type == "doctype:excel"){        
                         result.push(allFiles[i]);
                     }
                 }
@@ -297,6 +302,10 @@ export default class BoxIntegration extends LightningElement {
         else{
             this.showCurrentFoldersAndFiles();
         }
+    }
+
+    userDetails(){
+        this.viewUser = true;
     }
 
     // dowload a file
@@ -357,7 +366,7 @@ export default class BoxIntegration extends LightningElement {
     }
 
     togglePointerEvents(disable) {
-        const elementsToDisable = this.template.querySelectorAll('.left-sidebar, .header, .files-section, .photos-section, .videos-section, .docs-section, .breadcrum, .btns, .table');
+        const elementsToDisable = this.template.querySelectorAll('.left-sidebar, .header, .breadcrum, .btns, .table');
         console.log(elementsToDisable);
         console.log(disable);
         elementsToDisable.forEach(element => {

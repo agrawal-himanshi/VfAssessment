@@ -15,8 +15,15 @@
             <div class="slds-col slds-size_1-of-2 slds-text-align_right header-right">
                 <div class="slds-grid slds-grid_vertical-align-center slds-grid_align-end right">
                     <!-- User Account Icon -->
-                    <img src={userProfileImageUrl} alt="User Profile" class="profile-icon slds-m-right_small" style="width: 24px; height: 24px; border-radius: 50%;" />
+                    <!-- <lightning-icon icon-name="utility:user" alternative-text="user" size="small" class="slds-m-right_x-small" onclick={userDetails} style="cursor: pointer;"></lightning-icon> -->
+                        <img src={profileImage} alt="User Profile" class="profile-icon slds-m-right_small" style="width: 24px; height: 24px; border-radius: 50%;" />
                 </div>
+                <template if:true={viewUser}>
+                    <div>
+                        <div>email:{email}</div>
+                        <div>username:{username}</div>
+                    </div>
+                </template>
             </div>
         </header>
         <!-- Body Section -->
