@@ -10,11 +10,13 @@ global class GoogleDriveMockTest implements HttpCalloutMock {
 
     public HttpResponse respond(HTTPRequest req) {
         HttpResponse res = new HttpResponse();
+        res.setHeader('Content-Type', 'application/json');  // Set Content-Type
 
         // Handle files/folders listing requests (GET method)
         if (req.getMethod() == 'GET' && req.getEndpoint().contains('drive/v3/files')) {
             if (responseType == 'errors' && !flag) {
                 res.setStatusCode(401);  // First unauthorized error
+                res.setBody('{"error": "unauthorized"}');  // Set appropriate body content for errors
                 flag = true;
             } else {
                 res.setStatusCode(200);  // Success on subsequent call
@@ -35,20 +37,22 @@ global class GoogleDriveMockTest implements HttpCalloutMock {
             return res;
         }
 
+        System.debug('Request Endpoint: ' + req.getEndpoint());
         // Handle OAuth token requests
-        if (req.getEndpoint().contains('oauth2/token')) {
-            res.setStatusCode(200);
-            res.setBody('{"access_token":"test_access_token","expires_in":"3600","token_type": "bearer"}');
+        if (req.getEndpoint().contains('oauth2.googleapis.com/token')&&req.getBody().contains('authorization_code')) {
+            res.setStatusCode(200);  // Successful response
+            System.debug(res.getBody());
+            res.setBody('{"access_token":"test_access_token","refresh_token":"test_refresh_token", "expires_in":"3600","token_type": "bearer"}');
             return res;
         }
 
         // User details request (People API)
         if (req.getEndpoint().contains('people.googleapis.com')) {
             if (responseType == 'success') {
-                res.setStatusCode(200);
+                res.setStatusCode(200);  // Success on valid request
                 res.setBody('{"names": [{"displayName": "Test User"}], "emailAddresses": [{"value": "testuser@example.com"}]}');
             } else {
-                res.setStatusCode(400);
+                res.setStatusCode(400);  // Error on invalid request
                 res.setBody('{"error": "invalid_request"}');
             }
             return res;
@@ -58,6 +62,7 @@ global class GoogleDriveMockTest implements HttpCalloutMock {
         if (req.getMethod() == 'POST' && req.getEndpoint().contains('drive/v3/files')) {
             if (responseType == 'errors' && !flag) {
                 res.setStatusCode(401);  // Unauthorized on first call
+                res.setBody('{"error": "unauthorized"}');  // Set appropriate error body content
                 flag = true;
             } else {
                 res.setStatusCode(200);  // Success on subsequent call
@@ -73,17 +78,18 @@ global class GoogleDriveMockTest implements HttpCalloutMock {
         if (req.getMethod() == 'DELETE' && req.getEndpoint().contains('drive/v3/files')) {
             if (responseType == 'errors' && !flag) {
                 res.setStatusCode(401);  // Unauthorized error on first delete
+                res.setBody('{"error": "unauthorized"}');  // Set error response body
                 flag = true;
             } else {
-                res.setStatusCode(204);  // Success on subsequent delete
-                res.setBody('');  // No content
+                res.setStatusCode(204);  // Success on subsequent delete (No Content)
+                res.setBody('');  // No content for successful delete
             }
             return res;
         }
 
-        // Default response
-        res.setStatusCode(responseType == 'success' ? 200 : 400);
-        res.setHeader('Content-Type', 'application/json');
+        // Default error response if the endpoint is unrecognized
+        res.setStatusCode(400);  // Bad Request status code for unhandled cases
+        res.setBody('{"error": "invalid_request"}');  // Error message body
         return res;
     }
 }

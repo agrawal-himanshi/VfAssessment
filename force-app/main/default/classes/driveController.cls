@@ -78,8 +78,14 @@ public with sharing class driveController {
             if(res.responseStatusCode == '200'){   
                 jsonValues= parseBody(res.responseBody);     
                 UserDetailsWrapper userinformation = userDetails(jsonValues.get('access_token'));
+                system.debug('UserInformation: '+ userinformation);
                 saveToken(jsonValues.get('access_token'), jsonValues.get('refresh_token'), jsonValues.get('expires_in'),userinformation.email);
                 return userinformation;
+            }else if(res.responseStatusCode == '400'){
+                System.debug('Error (400): ' + res.responseBody);
+                UserDetailsWrapper errorResult = new UserDetailsWrapper();
+                errorResult.email = 'Invalid Request: ' + res.responseBody;  // Example of a failure message
+                return errorResult;  // Returning a custom object with a failure message instead of throwing an exception
             }
             else{
                 throw new AuraHandledException(res.responseBody);
@@ -348,6 +354,11 @@ public with sharing class driveController {
         public String username { get; set; }
         @AuraEnabled 
         public String email { get; set; }
+
+        public UserDetailsWrapper() {
+            this.email = '';
+            this.username = '';
+        }
     
         public UserDetailsWrapper(String username, String email) {
             this.username = username;

@@ -24,10 +24,10 @@ public with sharing class GoogleDriveServiceClass {
         req.setTimeout(60*1000);
         HttpResponse res = h.send(req);
         system.debug(res.getStatusCode());
-        if (res.getStatusCode() != 200) {
-            System.debug('Error: ' + res.getBody());
-            throw new AuraHandledException('Authorization failed with status ' + res.getStatusCode());
-        }
+        // if (res.getStatusCode() != 200) {
+        //     System.debug('Error: ' + res.getBody());
+        //     throw new AuraHandledException('Authorization failed with status ' + res.getStatusCode());
+        // }
         return new IntegrationWrapperClass(res.getBody(),String.valueof(res.getStatusCode()));
     }
 
