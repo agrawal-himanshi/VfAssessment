@@ -28,6 +28,7 @@ export default class BoxIntegration extends LightningElement {
     @track refreshToken;
     @track fetchedAccessToken;
     @track createFolderModal = false;
+    @track uploadFileModal = false;
     @track newFolderName = '';
     @track fileNameFromUi = '';
     @track fileContentFromUi;
@@ -227,35 +228,75 @@ export default class BoxIntegration extends LightningElement {
         let folderId = event.currentTarget.dataset.id;
         console.log(folderId);
         if(folderId == 'files-section'){
-            this.getRelatedFiles(folderId, currentFolder);
-            console.log('all files');
+            this.showCurrentFoldersAndFiles();
+            console.log('all folders/files');
         }
         else if(folderId == 'photos-section'){
-            this.getRelatedFiles(folderId, currentFolder);
+            getFilesANdFolders({accessToken : '', currentFolder : currentFolder, isNew : false, email:this.email})
+            .then(allFiles=>{
+                console.log(allFiles);
+                let result =[];
+                for(let i=0;i<allFiles.length;i++){
+                    if(allFiles[i].type == "doctype:image"){
+                        result.push(allFiles[i]);
+                    }
+                }
+                console.log(result);
+                if(result.length > 0){
+                    this.isNotEmpty = true; 
+                    this.folderAndFile = result;     
+                }
+                else{
+                    this.isNotEmpty = false;
+                }
+            })
             console.log('all photos');
         }
         else if(folderId == 'videos-section'){
-            this.getRelatedFiles(folderId, currentFolder);
+            getFilesANdFolders({accessToken : '', currentFolder : currentFolder, isNew : false, email:this.email})
+            .then(allFiles=>{
+                console.log(allFiles);
+                let result =[];
+                for(let i=0;i<allFiles.length;i++){
+                    if(allFiles[i].type == "doctype:video"){
+                        result.push(allFiles[i]);
+                    }
+                }
+                console.log(result);
+                if(result.length > 0){
+                    this.isNotEmpty = true; 
+                    this.folderAndFile = result;     
+                }
+                else{
+                    this.isNotEmpty = false;
+                }
+            })
             console.log('all videos');
         }
         else if(folderId == 'documents-section'){
-            this.getRelatedFiles(folderId, currentFolder);
+            getFilesANdFolders({accessToken : '', currentFolder : currentFolder, isNew : false, email:this.email})
+            .then(allFiles=>{
+                console.log(allFiles);
+                let result =[];
+                for(let i=0;i<allFiles.length;i++){
+                    if(allFiles[i].type == "doctype:pdf" || allFiles[i].type == "doctype:doc" || allFiles[i].type == "doctype:docx" || allFiles[i].type == "doctype:ppt" || allFiles[i].type == "doctype:pptx"|| allFiles[i].type == "doctype:txt"|| allFiles[i].type == "doctype:csv"|| allFiles[i].type == "doctype:htm"||  allFiles[i].type == "doctype:html"||  allFiles[i].type == "doctype:xlsx"||  allFiles[i].type == "doctype:xls"){        
+                        result.push(allFiles[i]);
+                    }
+                }
+                console.log(result);
+                if(result.length > 0){
+                    this.isNotEmpty = true; 
+                    this.folderAndFile = result;     
+                }
+                else{
+                    this.isNotEmpty = false;
+                }
+            })
             console.log('all documents');
         }
         else{
             this.showCurrentFoldersAndFiles();
         }
-    }
-
-    getRelatedFiles(folderId, currentFolder) {
-        const allFiles = getFilesANdFolders({accessToken : '', currentFolder : currentFolder, isNew : false, email:this.email})
-        // let result =[];
-        // allFiles.forEach(file => {
-        //     if (file.type == folderId) {
-        //         result.push(file);
-        //     }
-        // });
-        // this.folderAndFile = result;
     }
 
     // dowload a file
@@ -296,20 +337,36 @@ export default class BoxIntegration extends LightningElement {
 
     createFolderInBox(){
         this.createFolderModal = true;
+        this.togglePointerEvents(true); // Disable pointer events when modal is open
     }
 
     uploadFileToBox(){
         this.uploadFileModal = true;
+        this.togglePointerEvents(true); // Disable pointer events when modal is open
     }
 
     hideCreateFolderModal() {
         this.createFolderModal = false;
         this.newFolderName = ''; 
+        this.togglePointerEvents(false); // Enable pointer events when modal is closed
     }
 
     handleFolderNameChange(event) {
         this.newFolderName = event.detail.value;
         console.log(this.newFolderName); 
+    }
+
+    togglePointerEvents(disable) {
+        const elementsToDisable = this.template.querySelectorAll('.left-sidebar, .header, .files-section, .photos-section, .videos-section, .docs-section, .breadcrum, .btns, .table');
+        console.log(elementsToDisable);
+        console.log(disable);
+        elementsToDisable.forEach(element => {
+            if (disable) {
+                element.classList.add('no-pointer-events');
+            } else {
+                element.classList.remove('no-pointer-events');
+            }
+        });
     }
 
     get isCreateDisabled() {
@@ -341,6 +398,7 @@ export default class BoxIntegration extends LightningElement {
 
     hideUploadFolderModal(){
         this.uploadFileModal = false;
+        this.togglePointerEvents(false); // Enable pointer events when modal is closed
     }
 
     onUpload(event) {

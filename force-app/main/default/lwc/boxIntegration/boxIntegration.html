@@ -55,59 +55,55 @@
                         <lightning-card class="card" hide-header>
                             <lightning-breadcrumbs class="slds-m-around_small slds-grid slds-align-middle">
                                 <template for:each={path} for:item="item">
-                                    <lightning-breadcrumb key={item.value} name={item.value} label={item.label} data-value={item.value} onclick={handlePath}></lightning-breadcrumb>
+                                    <lightning-breadcrumb class="breadcrum" key={item.value} name={item.value} label={item.label} data-value={item.value} onclick={handlePath}></lightning-breadcrumb>
                                 </template>
                             </lightning-breadcrumbs>
                         </lightning-card>
                     </div>
                 </div>
                 <div class="slds-col" style="margin-top: 20px;">
-                    <lightning-button label="Create Folder" value="createFolder" onclick={createFolderInBox} style="margin-right: 10px;"></lightning-button>
-                    <lightning-button label="Upload Files" value="uploadFiles" onclick={uploadFileToBox}></lightning-button>
+                    <lightning-button class="btns" label="Create Folder" value="createFolder" onclick={createFolderInBox} style="margin-right: 10px;"></lightning-button>
+                    <lightning-button class="btns" label="Upload Files" value="uploadFiles" onclick={uploadFileToBox}></lightning-button>
                 </div>
-                <div>
-                    <template if:true={createFolderModal}>
-                        <div class="slds-fade-in-open createModal">
-                            <div class="slds-grid slds-grid_align-spread header">
-                                <lightning-icon icon-name="doctype:folder" alternative-text="folder" size="small" class="slds-m-right_x-small"></lightning-icon>
-                                <h2 class="slds-text-heading_medium" style="margin-right: 320px;">Create Folder</h2>
-                                <lightning-icon icon-name="utility:close" alternative-text="close" size="small" class="slds-m-right_x-small" onclick={hideCreateFolderModal} style="cursor: pointer;"></lightning-icon>
-                            </div>
-                            <hr class="slds-m-top_medium slds-m-bottom_medium"/>
-                            <div class="slds-grid slds-grid_align-center slds-m-top_medium">
-                                <lightning-input type="text" label="Folder Name" value={folderName} onchange={handleFolderNameChange} class="slds-size_1-of-1"></lightning-input>
-                            </div>
-                            <div class="slds-grid slds-grid_align-end slds-m-top_medium">
-                                <lightning-button label="Cancel" onclick={hideCreateFolderModal}></lightning-button>
-                                <lightning-button label="Create" onclick={createFolder} disabled={isCreateDisabled} style="margin-left: 10px;"></lightning-button>
-                            </div>
+                <template if:true={createFolderModal}>
+                    <div class="slds-modal slds-fade-in-open createModal">
+                        <div class="slds-grid slds-grid_align-spread header">
+                            <lightning-icon icon-name="doctype:folder" alternative-text="folder" size="small" class="slds-m-right_x-small"></lightning-icon>
+                            <h2 class="slds-text-heading_medium" style="margin-right: 320px;">Create Folder</h2>
+                            <lightning-icon icon-name="utility:close" alternative-text="close" size="small" class="slds-m-right_x-small" onclick={hideCreateFolderModal} style="cursor: pointer;"></lightning-icon>
                         </div>
-                    </template>
-                </div>
+                        <hr class="slds-m-top_medium slds-m-bottom_medium"/>
+                        <div class="slds-grid slds-grid_align-center slds-m-top_medium">
+                            <lightning-input type="text" label="Folder Name" value={folderName} onchange={handleFolderNameChange} class="slds-size_1-of-1"></lightning-input>
+                        </div>
+                        <div class="slds-grid slds-grid_align-end slds-m-top_medium">
+                            <lightning-button label="Cancel" onclick={hideCreateFolderModal}></lightning-button>
+                            <lightning-button label="Create" onclick={createFolder} disabled={isCreateDisabled} style="margin-left: 10px;"></lightning-button>
+                        </div>
+                    </div>
+                </template>
                 <!-- Upload File Modal -->
-                 <div>
-                    <template if:true={uploadFileModal}>
-                        <div class="slds-fade-in-open uploadModal">
-                            <div class="slds-grid slds-grid_align-spread uploadheader">
-                                <lightning-icon icon-name="doctype:folder" alternative-text="folder" size="small" class="slds-m-right_x-small"></lightning-icon>
-                                <h2 class="slds-text-heading_medium" style="margin-right: 320px;">Upload File</h2>
-                                <lightning-icon icon-name="utility:close" alternative-text="close" size="small" class="slds-m-right_x-small" onclick={hideUploadFolderModal} style="cursor: pointer;"></lightning-icon>
-                            </div>
-                            <hr class="slds-m-top_medium slds-m-bottom_medium"/>
-                            <div class="slds-grid slds-grid_align-center slds-m-top_medium">
-                                <lightning-input type="file" label="Upload File" onchange={onUpload} class="slds-size_1-of-1"></lightning-input>
-                                <span class="uploaded-file-name">{fileNameFromUi}</span>
-                            </div>
-                            <div class="slds-grid slds-grid_align-end slds-m-top_medium">
-                                <lightning-button label="Cancel" onclick={hideUploadFolderModal}></lightning-button>
-                                <lightning-button label="Upload" onclick={uploadFile} ></lightning-button>
-                            </div>
+                <template if:true={uploadFileModal}>
+                    <div class="slds-fade-in-open createModal">
+                        <div class="slds-grid slds-grid_align-spread header">
+                            <lightning-icon icon-name="doctype:folder" alternative-text="folder" size="small" class="slds-m-right_x-small"></lightning-icon>
+                            <h2 class="slds-text-heading_medium" style="margin-right: 320px;">Upload File</h2>
+                            <lightning-icon icon-name="utility:close" alternative-text="close" size="small" class="slds-m-right_x-small" onclick={hideUploadFolderModal} style="cursor: pointer;"></lightning-icon>
                         </div>
-                    </template>
-                </div>
+                        <hr class="slds-m-top_medium slds-m-bottom_medium"/>
+                        <div class="slds-grid slds-grid_align-center slds-m-top_medium">
+                            <lightning-input type="file" label="Upload File" onchange={onUpload} class="slds-size_1-of-1"></lightning-input>
+                            <span class="uploaded-file-name">{fileNameFromUi}</span>
+                        </div>
+                        <div class="slds-grid slds-grid_align-end slds-m-top_medium">
+                            <lightning-button label="Cancel" onclick={hideUploadFolderModal}></lightning-button>
+                            <lightning-button label="Upload" onclick={uploadFile} style="margin-left: 10px;" ></lightning-button>
+                        </div>
+                    </div>
+                </template>
                 <template if:true={recordsPresent}>
                     <template if:true={isNotEmpty}>
-                        <div style="overflow: auto; max-height: 400px; max-width: 100%; overflow-x: auto; overflow-y: auto;">
+                        <div class="table" style="overflow: auto; max-height: 400px; max-width: 100%; overflow-x: auto; overflow-y: auto;">
                             <!-- Table Header -->
                             <div class="table-header slds-grid">
                                 <div class="slds-col" style="width: 50px;"></div>
