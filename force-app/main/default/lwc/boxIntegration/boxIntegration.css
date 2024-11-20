@@ -3,15 +3,6 @@
     
 }
 
-.faded-background {
-    transition: opacity 0.5s ease-in-out;
-    opacity: 1;
-}
-
-.faded-background.loading {
-    opacity: 0.3;
-}
-
 .slds-m-top_medium {
     margin-top: 16px; 
 }
@@ -59,9 +50,6 @@
 .highlighted {
     background-color: white; 
     border-radius: 5px;        
-    transition: background-color 0.3s ease;
-    padding: 10px;               
-    box-sizing: border-box;   
 }
 
 .slds-dropdown-trigger {
@@ -100,8 +88,22 @@
 
 .no-pointer-events {
     pointer-events: none;
-    opacity: 0.1;
 }
+
+.userModal{
+    position: absolute;
+    top: 25%;
+    left: 90.5%;
+    transform: translate(-50%, -50%);
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transition: opacity 0.3s ease-in-out;
+    width: 260px;
+    z-index: 9001;
+    background-color: #f4f6f9;
+}
+
 
 
 

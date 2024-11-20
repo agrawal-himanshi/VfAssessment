@@ -14,39 +14,48 @@
             </div>
             <div class="slds-col slds-size_1-of-2 slds-text-align_right header-right">
                 <div class="slds-grid slds-grid_vertical-align-center slds-grid_align-end right">
-                    <!-- User Account Icon -->
-                    <!-- <lightning-icon icon-name="utility:user" alternative-text="user" size="small" class="slds-m-right_x-small" onclick={userDetails} style="cursor: pointer;"></lightning-icon> -->
-                        <img src={profileImage} alt="User Profile" class="profile-icon slds-m-right_small" style="width: 24px; height: 24px; border-radius: 50%;" />
+                    <lightning-icon icon-name="utility:user" alternative-text="user" size="small" class="slds-m-right_x-small" onclick={viewUserDetails} style="cursor: pointer;"></lightning-icon>
                 </div>
-                <template if:true={viewUser}>
-                    <div>
-                        <div>email:{email}</div>
-                        <div>username:{username}</div>
-                    </div>
-                </template>
             </div>
         </header>
+        <template if:true={viewUser}>
+            <div class="slds-fade-in-open userModal">
+                <div class="slds-grid slds-grid_align-spread">
+                    <h2 style="margin-left: 5px;">User Details</h2>
+                </div>
+                <hr class="slds-m-top--xx-small slds-m-bottom--x-small"/>
+                <div style="font-size: 18px;">{username}</div>
+                <div style="font-size: 14px; margin-left: 10px;">{email}</div>
+                <div class="slds-grid" style="margin-top:5px">
+                    <span style="cursor: pointer; margin-left: 5px;"  onclick={logOutUser}>Logout</span>
+                </div>
+                <hr class="slds-m-top--xx-small slds-m-bottom--x-small"/>
+                <div>
+                    <span style="cursor: pointer; margin-left: 5px;" onclick={doAuthOtherAcc}> Add Another Account</span>
+                </div>
+            </div>
+        </template>
         <!-- Body Section -->
         <div class="slds-grid slds-m-top_medium body">
             <!-- Left Sidebar -->
             <div class="slds-col slds-p-around_medium left-sidebar">
                 <!-- Files Section -->
-                <div class="files-section slds-grid slds-m-bottom_medium" style="cursor: pointer;" onclick={handleDivClick} data-id="files-section">
+                <div class="files-section slds-grid slds-m-bottom_medium" style="cursor: pointer; padding:5px;" onclick={handleDivClick} data-id="files-section">
                     <lightning-icon icon-name="doctype:folder" alternative-text="files" size="small" class="slds-m-right_x-small"></lightning-icon>
                     <h1 class="slds-m-vertical_none">All Files</h1>
                 </div>
                 <!-- Photos Section -->
-                <div class="photos-section slds-grid slds-m-top_large slds-m-bottom_medium" style="cursor: pointer;" onclick={handleDivClick} data-id="photos-section">
+                <div class="photos-section slds-grid slds-m-top_large slds-m-bottom_medium" style="cursor: pointer; padding:5px;" onclick={handleDivClick} data-id="photos-section">
                     <lightning-icon icon-name="doctype:image" alternative-text="image" size="small" class="slds-m-right_x-small"></lightning-icon>
                     <h1 class="slds-m-vertical_none">Photos</h1>
                 </div>
                 <!-- Videos Section -->
-                <div class="videos-section slds-grid slds-m-top_large slds-m-bottom_medium" style="cursor: pointer;" onclick={handleDivClick} data-id="videos-section">
+                <div class="videos-section slds-grid slds-m-top_large slds-m-bottom_medium" style="cursor: pointer; padding:5px;" onclick={handleDivClick} data-id="videos-section">
                     <lightning-icon icon-name="doctype:video" alternative-text="videos" size="small" class="slds-m-right_x-small"></lightning-icon>
                     <h1 class="slds-m-vertical_none">Videos</h1>
                 </div>
                 <!-- Document Section -->
-                <div class="docs-section slds-grid slds-m-top_large" style="cursor: pointer;" onclick={handleDivClick} data-id="docs-section">
+                <div class="docs-section slds-grid slds-m-top_large" style="cursor: pointer; padding:5px;" onclick={handleDivClick} data-id="docs-section">
                     <lightning-icon icon-name="doctype:gdoc" alternative-text="documents" size="small" class="slds-m-right_x-small"></lightning-icon>
                     <h1 class="slds-m-vertical_none">Documents</h1>
                 </div>
@@ -54,7 +63,7 @@
         
             <!-- Main Content Area -->
             <div class="slds-col slds-p-around_medium main-content-area">
-                <div class="slds-text-align_center" style="margin-bottom: 10px;">
+                <div class="slds-text-align_center" style="margin-bottom: 10px; margin-top: 10px">
                     <h1 class="slds-text-heading_large">Welcome To Box</h1>
                 </div>
                 <div class="slds-grid slds-wrap slds-grid_align-spread" style="margin-bottom: 10px; display: flex; align-items: stretch;">

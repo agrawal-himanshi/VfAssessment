@@ -24,7 +24,7 @@ public with sharing class boxServiceClass {
         req.setHeader('Content-length', string.ValueOf(bodyRequest.length()));
         req.setHeader('Content-Type', 'application/x-www-form-urlencoded');
         req.setMethod('POST');
-        req.setTimeout(60*1000);
+        req.setTimeout(30*1000);
         HttpResponse res = h.send(req);
         System.debug(res.getBody());
         system.debug(res.getStatusCode());

@@ -2,15 +2,16 @@ import { LightningElement, track } from 'lwc';
 import boxIconResource from '@salesforce/resourceUrl/boxIconResource';
 import createAuthURL from '@salesforce/apex/boxController.createAuthURL';
 import getAccessToken from '@salesforce/apex/BoxController.getAccessToken';
-// import getAllAccMailIds from '@salesforce/apex/BoxController.getAllAccMailIds';
 import getFilesANdFolders from '@salesforce/apex/boxController.getFilesANdFolders';
-//import userDetails from '@salesforce/apex/boxController.userDetails';
+import userDetails from '@salesforce/apex/boxController.userDetails';
 import createFolderInBox from '@salesforce/apex/boxController.createFolderInBox';
 import uploadFileBox from '@salesforce/apex/boxController.uploadFileBox';
 import deleteFileOrFolder from '@salesforce/apex/BoxController.deleteFileOrFolder';
 import previewFile from '@salesforce/apex/BoxController.previewFile';
 import downloadFile from '@salesforce/apex/BoxController.downloadFile';
 import accessTokenWithRefreshToken from '@salesforce/apex/boxController.accessTokenWithRefreshToken';
+import createAuthURLForOtherAcc from '@salesforce/apex/boxController.createAuthURLForOtherAcc';
+//import getAllAccMailIds from '@salesforce/apex/boxController.getAllAccMailIds';
 
 export default class BoxIntegration extends LightningElement {
     myCustomIconUrl = boxIconResource;
@@ -35,7 +36,6 @@ export default class BoxIntegration extends LightningElement {
     @track fileNameFromUi = '';
     @track fileContentFromUi;
     @track folderName;
-
     clientId = 'mym7rb5cn43lnz9tnzd0gl6l65w0da9l';
     clientSecret = 'uzuMt3CPI2e2QarxKwy8UZwdBzW0h5nd';
 
@@ -88,22 +88,22 @@ export default class BoxIntegration extends LightningElement {
                     this.connected = true; 
                     this.recordsPresent=true;
                     this.showCurrentFoldersAndFiles();
-                    // getAllAccMailIds()
-                    // .then(result => {
-                    //     this.ConnectedAccMailIds = result;
-                    //     if (this.ConnectedAccMailIds.length > 0) {
-                    //         this.email = this.ConnectedAccMailIds[0]; 
-                    //     }
-                    // })
-                    // userDetails({accessToken : this.fetchedAccessToken})
-                    // .then(user => {
-                    //     this.username = user.username;
-                    //     this.email = user.email;
-                    //     console.log('User details set:', this.username, this.email);
-                    // })
-                    // .catch(error => {
-                    //     console.error('Error retrieving user details:', error);
-                    // });
+                    getAllAccMailIds()
+                    .then(result => {
+                        this.ConnectedAccMailIds = result;
+                        if (this.ConnectedAccMailIds.length > 0) {
+                            this.email = this.ConnectedAccMailIds[0]; 
+                        }
+                    })
+                    userDetails({accessToken : this.fetchedAccessToken})
+                    .then(user => {
+                        this.username = user.username;
+                        this.email = user.email;
+                        console.log('User details set:', this.username, this.email);
+                    })
+                    .catch(error => {
+                        console.error('Error retrieving user details:', error);
+                    });
                 }
             })      
             .catch(error => {
@@ -117,33 +117,62 @@ export default class BoxIntegration extends LightningElement {
             .then(result => {
                 this.email = result.email;  
                 this.username = result.username;
-                this.profileImage = result.profileImage; 
                 console.log(this.email);
                 console.log(this.username);
-                console.log(this.profileImage);
                 this.isLoading=false;
                 this.connected = true; 
                 this.recordsPresent=true;
                 this.showCurrentFoldersAndFiles();
-                // // getAllAccMailIds()
-                // // .then(result => {
-                // //     this.ConnectedAccMailIds = result;
-                // // })
-                // // userDetails({accessToken : this.fetchedAccessToken})
-                // // .then(user => {
-                // //     this.username = user.username;
-                // //     this.email = user.email;
-                // //     console.log('User details set:', this.username, this.email);
-                // // })
-                // .catch(error => {
-                //     console.error('Error retrieving user details:', error);
-                // });
+                getAllAccMailIds()
+                .then(result => {
+                    this.ConnectedAccMailIds = result;
+                })
+                userDetails({accessToken : this.fetchedAccessToken})
+                .then(user => {
+                    this.username = user.username;
+                    this.email = user.email;
+                    console.log('User details set:', this.username, this.email);
+                })
+                .catch(error => {
+                    console.error('Error retrieving user details:', error);
+                });
             })
             .catch(error => {
                 this.isLoading=false;
                 //this.showToast('Error', error.body.message, 'error');
             });
         }
+    }
+
+    doAuthOtherAcc(){
+        this.isLoading=true;
+        console.log('hiii');
+        createAuthURLForOtherAcc()
+        .then(result=>{
+            window.location.href = result;
+            this.isLoading=false;
+            // getAccessToken({code: authcode})
+            // .then(result => {
+            //     this.email = result.email;  
+            //     this.username = result.username;
+            //     console.log(this.email);
+            //     this.isLoading=false;
+            //     this.recordsPresent=true;
+            //     // getAllAccMailIds()
+            //     // .then(result =>{
+            //     //     this.ConnectedAccMailIds = result;
+            //     // })
+            //     this.showCurrentFoldersAndFiles();  
+            // })            
+            // .catch(error => {
+            //     this.isLoading=false;
+            //     //this.showToast('Error', error.body.message, 'error');
+            // });
+        })
+        .catch(error => {
+            this.isLoading = false;
+            //this.showToast('Error', error.body.message, 'error');
+        });
     }
 
     showCurrentFoldersAndFiles(){
@@ -194,7 +223,6 @@ export default class BoxIntegration extends LightningElement {
         }
         else {
             console.log('in main else');
-            
             getFilesANdFolders({accessToken : '', currentFolder : currentFolder, isNew : false, email:this.email})
             .then(result=>{
                 console.log(result);
@@ -304,9 +332,21 @@ export default class BoxIntegration extends LightningElement {
         }
     }
 
-    userDetails(){
-        this.viewUser = true;
+    viewUserDetails(){
+        if(this.viewUser){
+            this.viewUser = false;
+            this.togglePointerEvents(false); // Enable pointer events when modal is closed
+        }
+        else{
+            this.viewUser = true;
+            this.togglePointerEvents(true); // Disable pointer events when modal is open
+        }
     }
+
+    // hideviewUser(){
+    //     this.viewUser = false;
+    //     this.togglePointerEvents(false); // Enable pointer events when modal is closed
+    // }
 
     // dowload a file
     fileDownload(event) {
@@ -366,7 +406,7 @@ export default class BoxIntegration extends LightningElement {
     }
 
     togglePointerEvents(disable) {
-        const elementsToDisable = this.template.querySelectorAll('.left-sidebar, .header, .breadcrum, .btns, .table');
+        const elementsToDisable = this.template.querySelectorAll('.left-sidebar, .box, .breadcrum, .btns, .table');
         console.log(elementsToDisable);
         console.log(disable);
         elementsToDisable.forEach(element => {
@@ -465,25 +505,14 @@ export default class BoxIntegration extends LightningElement {
         console.log(folderName);
         getFilesANdFolders({accessToken : '', currentFolder : currentFolder, isNew : false, email:this.email})
         .then(result=>{
-            this.folderAndFile = result.map(record => {
-                console.log(record.fileType);
-                if (record.fileType === 'folder') {
-                    record.isFolderfromhere = true;
-                } else {
-                    record.isFolderfromhere = false;
-                }
-                console.log(record.isFolderfromhere);
-                let iconNameFromMethod;
-                iconNameFromMethod = this.getIconNameForMimeType(record.fileType);
-                console.log(iconNameFromMethod);
-                return {
-                    ...record,
-                    isFolder: Boolean(record.isFolderfromhere),
-                    iconName: iconNameFromMethod,
-                };
-            });
-            this.folderAndFileLength = this.folderAndFile?.length ?? 0;
-            console.log('total no of object-->',this.folderAndFileLength);        
+            console.log(result);
+            if(result.length > 0){
+                this.isNotEmpty = true; 
+                this.folderAndFile = result;     
+            }
+            else{
+                this.isNotEmpty = false;
+            }
             this.isLoading = false;
             let path = this.path;
             path.push({ label : folderName, value : currentFolder });
@@ -525,6 +554,7 @@ export default class BoxIntegration extends LightningElement {
 
     handlePath(event) {
         const folderPath = event.target.dataset.value;
+        console.log(folderPath);
         this.isLoading = true; 
         const index = this.path.findIndex(item => item.value === folderPath);
         if (index === -1 || index === this.path.length - 1) {
@@ -533,32 +563,21 @@ export default class BoxIntegration extends LightningElement {
         }
         getFilesANdFolders({accessToken : '', currentFolder : folderPath, isNew : false, email:this.email})
         .then(result=>{
-            this.folderAndFile = result.map(record => {
-                console.log(record.fileType);
-                if (record.fileType === 'folder') {
-                    record.isFolderfromhere = true;
-                } else {
-                    record.isFolderfromhere = false;
-                }
-                console.log(record.isFolderfromhere);
-                let iconNameFromMethod;
-                iconNameFromMethod = this.getIconNameForMimeType(record.fileType);
-                console.log(iconNameFromMethod);
-                return {
-                    ...record,
-                    isFolder: Boolean(record.isFolderfromhere),
-                    iconName: iconNameFromMethod,
-                };
-            });
-            this.folderAndFileLength = this.folderAndFile?.length ?? 0;
-            console.log('total no of object-->',this.folderAndFileLength);        
+            console.log(result);
+            if(result.length > 0){
+                this.isNotEmpty = true; 
+                this.folderAndFile = result;     
+            }
+            else{
+                this.isNotEmpty = false;
+            }
+            this.isLoading = false;
             const path = this.path.slice(0, index + 1);
             this.path = path;
-            this.isLoading = false;
         })
         .catch(error => {
-            this.isLoading = false
-           // this.showToast('Error', error.body.message, 'error');
+            this.isLoading=false
+            //this.showToast('Error', error.body.message, 'error');
         });
     }
 

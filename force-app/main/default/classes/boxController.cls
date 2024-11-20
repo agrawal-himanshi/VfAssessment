@@ -94,6 +94,17 @@ public with sharing class boxController {
     }
 
     @AuraEnabled
+    public static String createAuthURLForOtherAcc() {
+        try {
+            IntegrationAssignment__mdt box = getMetaData(); 
+            String authuri = boxAuthorizeCode+'?response_type=code&client_id='+box.AppKey__c+'&redirect_uri=' +redirectUri; //authUri creation
+            return authuri;
+        } catch (Exception e) {
+            throw new AuraHandledException(e.getMessage());
+        }
+    }
+
+    @AuraEnabled
     public static UserDetailsWrapper userDetails(String accessToken) {
         try {
             IntegrationWrapperClass response;
@@ -104,11 +115,9 @@ public with sharing class boxController {
                 Map<String, Object> userDetailsMap = (Map<String, Object>) JSON.deserializeUntyped(response.responseBody);
                 String username =(String) userDetailsMap.get('name');
                 String emailId = (String) userDetailsMap.get('login');
-                String profileImg = (String) userDetailsMap.get('avatar_url');
                 system.debug(username);
                 system.debug(emailId);
-                System.debug(profileImg);
-                return new UserDetailsWrapper(username, emailId, profileImg);
+                return new UserDetailsWrapper(username, emailId);
             } 
             return null; 
         } catch (Exception e) {
@@ -408,13 +417,10 @@ public with sharing class boxController {
         public String username { get; set; }
         @AuraEnabled 
         public String email { get; set; }
-        @AuraEnabled 
-        public String profileImg { get; set; }
 
-        public UserDetailsWrapper(String username, String email, String profileImage) {
+        public UserDetailsWrapper(String username, String email) {
             this.username = username;
             this.email = email;
-            this.profileImg = profileImage;
         }
     }
 
@@ -478,11 +484,16 @@ public with sharing class boxController {
                                     FROM Integration_Access__c 
                                     WHERE user_mail__c = :mailId AND Record_Type__c = 'BOX'
                                     LIMIT 1];
+                                    System.debug(myCustomObject);
                 } 
                 catch (QueryException e) {
                     system.debug('No Integration_Access__c record found for: ' + mailId);
                     myCustomObject = null; 
                 }
+                // if (myCustomObject == null) {
+                //     system.debug('No Integration_Access__c record found for: ' + mailId);
+                //     myCustomObject = null;  // Set to null if no record is found
+                // }    
             }
             else{
                 myCustomObject = null; 
@@ -506,6 +517,24 @@ public with sharing class boxController {
         catch (Exception e) {
             throw new AuraHandledException(e.getMessage());
         }
+    }
+
+    @AuraEnabled
+    public static List<Integration_Access__c> getAllAccMailIds() {
+        List<Integration_Access__c> records = new List<Integration_Access__c>();
+        try {
+            records = [SELECT Id, user_mail__c FROM Integration_Access__c WHERE user_mail__c != null AND Record_Type__c = 'GOOGLE DRIVE'];
+        } 
+        catch (QueryException e) {
+            system.debug('No Integration Access record found or an error occurred: ' + e.getMessage());
+            return null; 
+        }
+        system.debug(records);                           
+        if (records == null) {
+            system.debug('Integration_Access__c record does not exist for user: ');
+            return null; 
+        }
+        return records; 
     }
 
     @AuraEnabled
