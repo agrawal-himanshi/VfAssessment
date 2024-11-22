@@ -515,6 +515,3 @@ public with sharing class DropboxIntegrationController {
         return jsonValues;
     }
 }
-
-            
-

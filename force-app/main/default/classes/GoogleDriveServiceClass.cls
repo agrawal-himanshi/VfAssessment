@@ -8,7 +8,7 @@ public with sharing class GoogleDriveServiceClass {
     public static IntegrationWrapperClass getaccessToken(String clientId, String clientSecret, String code, String redirectUri){
         Http h = new Http();
         HttpRequest req = new HttpRequest();
-        req.setEndpoint(googleDriveOAuthToken);  
+        req.setEndpoint('https://oauth2.googleapis.com/token');  
         system.debug(code);
         string bodyRequest = '';
         bodyRequest = 'code=' + EncodingUtil.urlEncode(code, 'UTF-8');

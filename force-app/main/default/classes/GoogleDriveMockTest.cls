@@ -40,9 +40,15 @@ global class GoogleDriveMockTest implements HttpCalloutMock {
         System.debug('Request Endpoint: ' + req.getEndpoint());
         // Handle OAuth token requests
         if (req.getEndpoint().contains('oauth2.googleapis.com/token')&&req.getBody().contains('authorization_code')) {
-            res.setStatusCode(200);  // Successful response
-            System.debug(res.getBody());
-            res.setBody('{"access_token":"test_access_token","refresh_token":"test_refresh_token", "expires_in":"3600","token_type": "bearer"}');
+             if(responseType == 'error') {
+                res.setStatusCode(400);  // Error on invalid request
+                res.setBody('{"error": "invalid_request"}');
+            }
+            else{
+            	res.setStatusCode(200);  // Successful response
+            	System.debug(res.getBody());
+            	res.setBody('{"access_token":"test_access_token","refresh_token":"test_refresh_token", "expires_in":"3600","token_type": "bearer"}');
+            }
             return res;
         }
 

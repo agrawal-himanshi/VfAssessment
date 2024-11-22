@@ -166,5 +166,4 @@
             // if (mockResponseType == 'error') {
             //     res.setBody('{"error":"server_error","error_description":"An internal error occurred"}');
             //     res.setStatusCode(500);
-            // }         
-        
+            // }
