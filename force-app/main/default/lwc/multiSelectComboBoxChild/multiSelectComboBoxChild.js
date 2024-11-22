@@ -8,18 +8,19 @@ export default class MultiSelectComboBoxChild extends LightningElement {
     @api label;
     @api disabled = false;
     @api multiSelect = false;
-    @track value;
+    value;
     @track values = [];
     @track optionData;
-    @track searchString;
-    @track noResultMessage;
-    @track showDropdown = false;
- 
+    searchString;
+    message;
+    showDropdown = false;
+
     connectedCallback() {
         this.showDropdown = false;
-        var optionData = this.options ? (JSON.parse(JSON.stringify(this.options))) : null;
-        var value = this.selectedValue ? (JSON.parse(JSON.stringify(this.selectedValue))) : null;
-        var values = this.selectedValues ? (JSON.parse(JSON.stringify(this.selectedValues))) : null;
+        console.log(this.options);
+        var optionData = this.options;
+        var value = this.selectedValue;
+        var values = this.selectedValues;
         if(value || values) {
             var searchString;
             var count = 0;
@@ -44,31 +45,20 @@ export default class MultiSelectComboBoxChild extends LightningElement {
         this.values = values;
         this.optionData = optionData;
     }
- 
-    filterOptions(event) {
-        this.searchString = event.target.value;
-        if( this.searchString && this.searchString.length > 0 ) {
-            this.noResultMessage = '';
-            if(this.searchString.length >= 2) {
-                var flag = true;
-                for(var i = 0; i < this.optionData.length; i++) {
-                    if(this.optionData[i].label.toLowerCase().trim().startsWith(this.searchString.toLowerCase().trim())) {
-                        this.optionData[i].isVisible = true;
-                        flag = false;
-                    } else {
-                        this.optionData[i].isVisible = false;
-                    }
-                }
-                if(flag) {
-                    this.noResultMessage = "No results found for '" + this.searchString + "'";
-                }
+    showOptions() {
+        if(this.disabled == false && this.options) {
+            this.message = '';
+            this.searchString = '';
+            var options = JSON.parse(JSON.stringify(this.optionData));
+            for(var i = 0; i < options.length; i++) {
+                options[i].isVisible = true;
             }
-            this.showDropdown = true;
-        } else {
-            this.showDropdown = false;
+            if(options.length > 0) {
+                this.showDropdown = true;
+            }
+            this.optionData = options;
         }
     }
- 
     selectItem(event) {
         var selectedVal = event.currentTarget.dataset.id;
         if(selectedVal) {
@@ -95,53 +85,43 @@ export default class MultiSelectComboBoxChild extends LightningElement {
             this.optionData = options;
             if(this.multiSelect){
                 this.searchString = count + ' Option(s) Selected';
-
-                let ev = new CustomEvent('selectoption', {detail:this.values});
-                this.dispatchEvent(ev);
             }
-                
-
-            if(!this.multiSelect){
-                let ev = new CustomEvent('selectoption', {detail:this.value});
-                this.dispatchEvent(ev);
-            }
-
             if(this.multiSelect)
                 event.preventDefault();
             else
                 this.showDropdown = false;
         }
     }
- 
-    showOptions() {
-        if(this.disabled == false && this.options) {
-            this.noResultMessage = '';
-            this.searchString = '';
-            var options = JSON.parse(JSON.stringify(this.optionData));
-            for(var i = 0; i < options.length; i++) {
-                options[i].isVisible = true;
+    filterOptions(event) {
+        this.searchString = event.target.value;
+        if( this.searchString && this.searchString.length > 0 ) {
+            this.message = '';
+            if(this.searchString.length >= 2) {
+                var flag = true;
+                for(var i = 0; i < this.optionData.length; i++) {
+                    if(this.optionData[i].label.toLowerCase().trim().startsWith(this.searchString.toLowerCase().trim())) {
+                        this.optionData[i].isVisible = true;
+                        flag = false;
+                    } else {
+                        this.optionData[i].isVisible = false;
+                    }
+                }
+                if(flag) {
+                    this.message = "No results found for '" + this.searchString + "'";
+                }
             }
-            if(options.length > 0) {
-                this.showDropdown = true;
-            }
-            this.optionData = options;
+            this.showDropdown = true;
+        } else {
+            this.showDropdown = false;
         }
     }
 
-    @api clearAll() {
-        this.values = [];
-        var optionData = this.options ? (JSON.parse(JSON.stringify(this.options))) : null;
-        for (var i = 0; i < optionData.length; i++) {
-            if (this.multiSelect) {
-                optionData[i].selected = false;
-            }
-        }
-        this.searchString = 0 + ' Option(s) Selected';
-        this.selectedValues = [];
-        this.optionData = optionData;
-    }
- 
-    closePill(event) {
+    // Function to handle blur event on the combobox input
+    blurEvent() {
+        this.showDropdown = false; // Hide the dropdown
+    }               
+
+    removePill(event) {
         var value = event.currentTarget.name;
         var count = 0;
         var options = JSON.parse(JSON.stringify(this.optionData));
@@ -157,39 +137,7 @@ export default class MultiSelectComboBoxChild extends LightningElement {
         this.optionData = options;
         if(this.multiSelect){
             this.searchString = count + ' Option(s) Selected';
-            
-            let ev = new CustomEvent('selectoption', {detail:this.values});
-            this.dispatchEvent(ev);
         }
-    }
- 
-    handleBlur() {
-        var previousLabel;
-        var count = 0;
-
-        for(var i = 0; i < this.optionData.length; i++) {
-            if(this.optionData[i].value === this.value) {
-                previousLabel = this.optionData[i].label;
-            }
-            if(this.optionData[i].selected) {
-                count++;
-            }
-        }
-
-        if(this.multiSelect){
-            this.searchString = count + ' Option(s) Selected';
-        }else{
-            this.searchString = previousLabel;
-        }
-
-        this.showDropdown = false;
-    }
-
-    handleMouseOut(){
-        this.showDropdown = false;
-    }
-
-    handleMouseIn(){
-        this.showDropdown = true;
     }
 }
+    

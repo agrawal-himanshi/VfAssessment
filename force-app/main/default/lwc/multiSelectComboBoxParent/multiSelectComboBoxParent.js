@@ -1,47 +1,47 @@
 import { LightningElement, track, wire } from 'lwc';
 import ACCOUNT_OBJECT from '@salesforce/schema/Account';
 import TYPE_FIELD from '@salesforce/schema/Account.Type';
+// import RATING_FIELD from "@salesforce/schema/Account.Rating";
 import { getPicklistValues, getObjectInfo } from 'lightning/uiObjectInfoApi';
-const options = [
-                    {'label':'India','value':'India'},
-                    {'label':'USA','value':'USA'},
-                    {'label':'China','value':'China'},
-                    {'label':'Rusia','value':'Rusia'}
-                ];
 
 export default class MultiSelectComboBoxParent extends LightningElement {
  
-    @track selectedValue = 'Customer - Direct';//selected values
-    @track selectedValueList = ['Customer - Direct'];//selected values
-    @track options; //= options;
+    options;
+    toggleEnabled ='false';
+    accountRecordTypeId;
 
     @wire(getObjectInfo, { objectApiName: ACCOUNT_OBJECT })
-    objectInfo;
- 
-    //fetch picklist options
-    @wire(getPicklistValues, {
-        recordTypeId: "$objectInfo.data.defaultRecordTypeId",
-        fieldApiName: TYPE_FIELD
-    })
-    wirePickList({ error, data }) {
+    results({ error, data }) {
         if (data) {
-            this.options = data.values;
+        this.accountRecordTypeId = data.defaultRecordTypeId;
         } else if (error) {
-            console.log(error);
+        this.error = error;
         }
     }
-     
-    //for single select picklist
-    handleSelectOption(event){
-        console.log(event.detail);
-        this.selectedValue = event.detail;
-    }
- 
-    //for multiselect picklist
-    handleSelectOptionList(event){
-        console.log(event.detail);
-        this.selectedValueList = event.detail;
-        console.log(this.selectedValueList);
-    }
 
+    @wire(getPicklistValues, { recordTypeId: "$accountRecordTypeId", fieldApiName: TYPE_FIELD})
+    picklistResults({ error, data }) {
+        if (data) {
+        this.options = data.values;
+        console.log(this.options);
+        } else if (error) {
+        this.error = error;
+        }
+    }
+    
+    // @track options = [
+    //     { label: 'Prospect', value: 'Prospect' },
+    //     { label: 'Customer - Direct', value: 'Customer - Direct' },
+    //     { label: 'Customer - Channel', value: 'Customer - Channel' },
+    //     { label: 'Channel Partner / Reseller', value: 'Channel Partner / Reseller' },
+    //     { label: 'Installation Partner', value: 'Installation Partner' },
+    //     { label: 'Technology Partner', value: 'Technology Partner' },
+    //     { label: 'Other', value: 'Other' }
+    // ];
+    
+    toggleSelectionType(event) {
+        let toggleValue = event.target.checked;
+        this.toggleEnabled = toggleValue;
+    }
+     
 }
