@@ -1,19 +1,19 @@
 import { LightningElement, track } from 'lwc';
 import boxIconResource from '@salesforce/resourceUrl/boxIconResource';
 import createAuthURL from '@salesforce/apex/boxController.createAuthURL';
-import getAccessToken from '@salesforce/apex/BoxController.getAccessToken';
+import getAccessToken from '@salesforce/apex/boxController.getAccessToken';
 import getFilesANdFolders from '@salesforce/apex/boxController.getFilesANdFolders';
 import userDetails from '@salesforce/apex/boxController.userDetails';
 import createFolderInBox from '@salesforce/apex/boxController.createFolderInBox';
 import uploadFileBox from '@salesforce/apex/boxController.uploadFileBox';
-import deleteFileOrFolder from '@salesforce/apex/BoxController.deleteFileOrFolder';
-import previewFile from '@salesforce/apex/BoxController.previewFile';
-import downloadFile from '@salesforce/apex/BoxController.downloadFile';
+import deleteFileOrFolder from '@salesforce/apex/boxController.deleteFileOrFolder';
+import previewFile from '@salesforce/apex/boxController.previewFile';
+import downloadFile from '@salesforce/apex/boxController.downloadFile';
 import accessTokenWithRefreshToken from '@salesforce/apex/boxController.accessTokenWithRefreshToken';
 import createAuthURLForOtherAcc from '@salesforce/apex/boxController.createAuthURLForOtherAcc';
 import getAllAccMailIds from '@salesforce/apex/boxController.getAllAccMailIds';
 import getTokens from '@salesforce/apex/boxController.getTokens';
-import revokeBoxAccount from '@salesforce/apex/boxcontroller.revokeBoxAccount';
+import revokeBoxAccount from '@salesforce/apex/boxController.revokeBoxAccount';
 
 export default class BoxIntegration extends LightningElement {
     myCustomIconUrl = boxIconResource;
