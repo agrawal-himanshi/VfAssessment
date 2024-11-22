@@ -2,7 +2,7 @@
     <div class="slds-wrap slds-grid_align-spread main-content">
         <template if:true={isLoading}>
             <div class="slds-spinner_container">
-                <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+                <lightning-spinner alternative-text="Loading" size="large"></lightning-spinner>
             </div>
         </template>
         <header class="slds-grid slds-size_1-of-1 header">
@@ -17,24 +17,38 @@
                     <lightning-icon icon-name="utility:user" alternative-text="user" size="small" class="slds-m-right_x-small" onclick={viewUserDetails} style="cursor: pointer;"></lightning-icon>
                 </div>
             </div>
+            <template if:true={viewUser}>
+                <div class="slds-fade-in-open userModal" style="margin-left: 5px;">
+                    <div class="slds-grid slds-grid_align-spread">
+                        <h2>User Details</h2>
+                    </div>
+                    <hr class="slds-m-top--xx-small slds-m-bottom--x-small"/>
+                    <div style="font-size: 15px;">{username}</div>
+                    <div style="font-size: 11px;" data-email={email}>{email}</div>
+                    <div class="slds-grid" style="margin-top:5px">
+                        <a class="slds-truncate" onclick={logOutUser} style="cursor: pointer;">Logout</a>
+                    </div>
+                    <template if:true={flag}>
+                        <hr class="slds-m-top--xx-small slds-m-bottom--x-small"/>
+                        <div>
+                            <template for:each={ConnectedAccMailIds} for:item="AccMailId">
+                                <tr key={AccMailId.Id} class="slds-hint-parent">
+                                    <td data-label="User Email">
+                                        <div class="slds-truncate" title={AccMailId.user_mail__c}> 
+                                            <a class="slds-truncate"  data-email={AccMailId.user_mail__c} onclick={handleEmailClick} style="cursor: pointer; font-size: 14px;" >{AccMailId.user_mail__c}</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </template>
+                        </div>
+                    </template>
+                    <hr class="slds-m-top--xx-small slds-m-bottom--x-small"/>
+                    <div>
+                        <span style="cursor: pointer; margin-left: 5px;" onclick={doAuthOtherAcc}> Add Another Account</span>
+                    </div>
+                </div>
+            </template>
         </header>
-        <template if:true={viewUser}>
-            <div class="slds-fade-in-open userModal">
-                <div class="slds-grid slds-grid_align-spread">
-                    <h2 style="margin-left: 5px;">User Details</h2>
-                </div>
-                <hr class="slds-m-top--xx-small slds-m-bottom--x-small"/>
-                <div style="font-size: 18px;">{username}</div>
-                <div style="font-size: 14px; margin-left: 10px;">{email}</div>
-                <div class="slds-grid" style="margin-top:5px">
-                    <span style="cursor: pointer; margin-left: 5px;"  onclick={logOutUser}>Logout</span>
-                </div>
-                <hr class="slds-m-top--xx-small slds-m-bottom--x-small"/>
-                <div>
-                    <span style="cursor: pointer; margin-left: 5px;" onclick={doAuthOtherAcc}> Add Another Account</span>
-                </div>
-            </div>
-        </template>
         <!-- Body Section -->
         <div class="slds-grid slds-m-top_medium body">
             <!-- Left Sidebar -->
@@ -82,7 +96,7 @@
                     <lightning-button class="btns" label="Upload Files" value="uploadFiles" onclick={uploadFileToBox}></lightning-button>
                 </div>
                 <template if:true={createFolderModal}>
-                    <div class="slds-modal slds-fade-in-open createModal">
+                    <div class="slds-fade-in-open createModal">
                         <div class="slds-grid slds-grid_align-spread header">
                             <lightning-icon icon-name="doctype:folder" alternative-text="folder" size="small" class="slds-m-right_x-small"></lightning-icon>
                             <h2 class="slds-text-heading_medium" style="margin-right: 320px;">Create Folder</h2>
@@ -107,8 +121,8 @@
                             <lightning-icon icon-name="utility:close" alternative-text="close" size="small" class="slds-m-right_x-small" onclick={hideUploadFolderModal} style="cursor: pointer;"></lightning-icon>
                         </div>
                         <hr class="slds-m-top_medium slds-m-bottom_medium"/>
-                        <div class="slds-grid slds-grid_align-center slds-m-top_medium">
-                            <lightning-input type="file" label="Upload File" onchange={onUpload} class="slds-size_1-of-1"></lightning-input>
+                        <div class="slds-m-top_medium">
+                            <lightning-input type="file" label="Upload File" onchange={onUpload}></lightning-input>
                             <span class="uploaded-file-name">{fileNameFromUi}</span>
                         </div>
                         <div class="slds-grid slds-grid_align-end slds-m-top_medium">

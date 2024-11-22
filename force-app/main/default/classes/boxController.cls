@@ -10,11 +10,7 @@ public with sharing class boxController {
             String authuri = boxAuthorizeCode+'?response_type=code&client_id='+box.AppKey__c+'&redirect_uri=' +redirectUri; //authUri creation
             Map<String, Object> uriMap = new Map<String, Object>(); // Creating Map for URL redirect
             List<Integration_Access__c> recordcheck = new List<Integration_Access__c>();
-            try {
-                recordcheck = [SELECT Id, user_mail__c FROM Integration_Access__c WHERE Record_Type__c = 'BOX'];
-            } catch (QueryException e) {
-                System.debug('No Integration Access record found or an error occurred: ' + e.getMessage());
-            }
+            recordcheck = [SELECT Id, user_mail__c FROM Integration_Access__c WHERE Record_Type__c = 'BOX'];
             System.debug(recordcheck);
             if (recordcheck.isEmpty()) {
                 uriMap.put('authUri', authuri);
@@ -115,9 +111,11 @@ public with sharing class boxController {
                 Map<String, Object> userDetailsMap = (Map<String, Object>) JSON.deserializeUntyped(response.responseBody);
                 String username =(String) userDetailsMap.get('name');
                 String emailId = (String) userDetailsMap.get('login');
+                String id;
                 system.debug(username);
                 system.debug(emailId);
-                return new UserDetailsWrapper(username, emailId);
+                system.debug(id);
+                return new UserDetailsWrapper(username, emailId,id);
             } 
             return null; 
         } catch (Exception e) {
@@ -165,11 +163,6 @@ public with sharing class boxController {
                 system.debug(response.responseBody);
                 data = getData(response.responseBody);
                 system.debug(data);
-            // } else if(response.responseStatusCode == '401') {
-            //     Map<string, string> jsonValues = accessTokenWithRefreshToken(box.AppKey__c,box.AppSecret__c,tokens.Refresh_Token__c,email);
-            //     data = getFilesANdFolders(jsonValues.get('access_token'),currentFolder,isNew,email);
-            //     saveToken(jsonValues.get('access_token'),jsonValues.get('refresh_token'),jsonValues.get('expires_in'),tokens.user_mail__c);
-            // 
             }
             else {
                 throw new AuraHandledException(response.responseBody);
@@ -288,13 +281,6 @@ public with sharing class boxController {
                 List<BoxItem> data= getFilesANdFolders(accessToken,current,false,email);
                 return data;
             }
-            else if(response.responseStatusCode == '400'){
-                Map<string, string> jsonValues = accessTokenWithRefreshToken(box.AppKey__c,box.AppSecret__c,tokens.Refresh_Token__c,email);
-                accessToken=jsonValues.get('access_token');
-                List<BoxItem> data= createFolderInBox(accessToken,current,fileName,email);
-                saveToken(jsonValues.get('access_token'),jsonValues.get('refresh_token'),jsonValues.get('expires_in'),email);
-                return data;
-            }
             else{
                 throw new AuraHandledException(response.responseBody);
             }
@@ -331,6 +317,29 @@ public with sharing class boxController {
                 errorMessage = e.getMessage();
             }
             throw new AuraHandledException(errorMessage);
+        }
+    }
+
+    @AuraEnabled
+    public static String revokeBoxAccount(String mailId) {
+        try {
+            system.debug(mailId);
+            // database.query('SELECT Id, Access_Token__c, Refresh_Token__c, Expire_In_Time__c ,user_mail__c FROM Integration_Access__c WHERE user_mail__c = \'' + mailId + '\' AND Record_Type__c = \'BOX\' LIMIT 1');
+                                   
+            Integration_Access__c record = database.query('SELECT Access_Token__c FROM Integration_Access__c WHERE user_mail__c = \''+mailId+'\' AND Record_Type__c = \'BOX\' LIMIT 1');
+            system.debug(record);
+            IntegrationWrapperClass res = BoxServiceClass.revokeToken(record.Access_Token__c);
+            system.debug(res.responseStatusCode);
+            if(res.responseStatusCode == '200'){   
+                delete record;
+                return 'Success';
+            }
+            else{
+                throw new AuraHandledException(res.responseBody);
+            }            
+        }
+        catch(Exception e){
+            throw new AuraHandledException(e.getMessage());
         }
     }
     
@@ -417,10 +426,14 @@ public with sharing class boxController {
         public String username { get; set; }
         @AuraEnabled 
         public String email { get; set; }
+        @AuraEnabled
+        public String id { get; set;}
 
-        public UserDetailsWrapper(String username, String email) {
+
+        public UserDetailsWrapper(String username, String email, String id) {
             this.username = username;
             this.email = email;
+            this.id = id;
         }
     }
 
@@ -442,10 +455,8 @@ public with sharing class boxController {
         Integration_Access__c record;
         if(mailId!=null) {
             try {
-                record = [SELECT Id, Access_Token__c, Refresh_Token__c, Expire_In_Time__c,user_mail__c 
-                    FROM Integration_Access__c 
-                    WHERE user_mail__c= :mailId AND Record_Type__c = 'BOX'
-                    LIMIT 1];
+                record = database.query('SELECT Id, Access_Token__c, Refresh_Token__c, Expire_In_Time__c ,user_mail__c FROM Integration_Access__c WHERE user_mail__c = \'' + mailId + '\' AND Record_Type__c = \'BOX\' LIMIT 1');
+                                   
             } 
             catch (QueryException e) {
                 system.debug('No Integration Access record found or an error occurred: ' + e.getMessage());
@@ -480,20 +491,13 @@ public with sharing class boxController {
             Integration_Access__c myCustomObject;
             if(mailId!=null){
                 try {
-                    myCustomObject = [SELECT Id, Access_Token__c, Refresh_Token__c, Expire_In_Time__c ,user_mail__c
-                                    FROM Integration_Access__c 
-                                    WHERE user_mail__c = :mailId AND Record_Type__c = 'BOX'
-                                    LIMIT 1];
+                    myCustomObject = database.query('SELECT Id, Access_Token__c, Refresh_Token__c, Expire_In_Time__c ,user_mail__c FROM Integration_Access__c WHERE user_mail__c = \'' + mailId + '\' AND Record_Type__c = \'BOX\' LIMIT 1');
                                     System.debug(myCustomObject);
                 } 
                 catch (QueryException e) {
                     system.debug('No Integration_Access__c record found for: ' + mailId);
                     myCustomObject = null; 
-                }
-                // if (myCustomObject == null) {
-                //     system.debug('No Integration_Access__c record found for: ' + mailId);
-                //     myCustomObject = null;  // Set to null if no record is found
-                // }    
+                } 
             }
             else{
                 myCustomObject = null; 
@@ -523,7 +527,7 @@ public with sharing class boxController {
     public static List<Integration_Access__c> getAllAccMailIds() {
         List<Integration_Access__c> records = new List<Integration_Access__c>();
         try {
-            records = [SELECT Id, user_mail__c FROM Integration_Access__c WHERE user_mail__c != null AND Record_Type__c = 'GOOGLE DRIVE'];
+            records = [SELECT Id, user_mail__c FROM Integration_Access__c WHERE user_mail__c != null AND Record_Type__c = 'BOX'];
         } 
         catch (QueryException e) {
             system.debug('No Integration Access record found or an error occurred: ' + e.getMessage());

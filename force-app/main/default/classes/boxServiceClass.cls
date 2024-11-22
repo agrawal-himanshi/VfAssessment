@@ -208,4 +208,28 @@ public with sharing class boxServiceClass {
         return bodyBlob;
     }
 
+    public static IntegrationWrapperClass revokeToken(String accessToken) {
+        Http http = new Http();
+        HttpRequest request = new HttpRequest();
+        request.setEndpoint('https://api.box.com/oauth2/revoke');
+        request.setMethod('POST');
+        request.setHeader('Content-Type', 'application/x-www-form-urlencoded');
+        String body = 'token=' + accessToken;
+        request.setBody(body);
+        String clientId = 'mym7rb5cn43lnz9tnzd0gl6l65w0da9l';  
+        String clientSecret = 'uzuMt3CPI2e2QarxKwy8UZwdBzW0h5nd'; 
+        String authorizationHeader = 'Basic ' + EncodingUtil.base64Encode(Blob.valueOf(clientId + ':' + clientSecret));
+        request.setHeader('Authorization', authorizationHeader);
+        HttpResponse response = http.send(request);
+        System.debug('Status Code: ' + response.getStatusCode());
+        System.debug('Response Body: ' + response.getBody());
+        if (response.getStatusCode() != 200) {
+            System.debug('Error Response: ' + response.getBody());
+            throw new AuraHandledException('Failed to revoke user. Status Code: ' + response.getStatusCode() + ', ' + response.getBody());
+        }
+        return new IntegrationWrapperClass(response.getBody(), String.valueOf(response.getStatusCode()));
+    }
+    
+
+    
 }

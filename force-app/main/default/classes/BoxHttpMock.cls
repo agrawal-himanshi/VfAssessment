@@ -15,19 +15,25 @@
     global HTTPResponse respond(HTTPRequest req) {
         HttpResponse res = new HttpResponse();
         res.setHeader('Content-Type', 'application/json');
-        if (req.getEndpoint().contains('/oauth2/token') && req.getBody().contains('code')) {
-            res.setBody('{"access_token": "mock_access_token", "refresh_token": "mock_refresh_token", "expires_in": 3600}');
+        if (req.getEndpoint().contains('/oauth2/token') && req.getBody().contains('authorization_code')) {
+            res.setStatusCode(200);  // Successful response
+            System.debug(res.getBody());
+            res.setBody('{"access_token":"test_access_token","refresh_token":"test_refresh_token", "expires_in":"3600","token_type": "bearer"}');
         }else if (req.getEndpoint().contains('/oauth2/token') && req.getBody().contains('refresh_token')) {
             res.setBody('{"access_token": "mock_access_token", "refresh_token": "", "expires_in": 3600}');
             if(type == 'refreshErrors'){
                 res.setStatusCode(409);
                 return res;
             }
-             
             if(type == 'filesError' || type == 'deleteError' || type == 'createError' || type == 'errors' || type == 'uploadError' || type == 'downloadError'){
                 res.setStatusCode(200);
                 return res;
             }
+        }else if(req.getEndpoint().contains('/users/me')) {
+            res.setStatusCode(200);  // Success on valid request
+            System.debug(res.getBody());
+            res.setBody('{"name": "Test User", "login":"testuser@example.com"}');
+            System.debug(res.getBody());
         }else if (req.getEndpoint().contains('/folders/') && req.getMethod() == 'GET') {
             String response = '{"entries": [';
                 response += '{"id": "1", "name": "Document.pdf", "type": "file"},';
@@ -60,6 +66,7 @@
             }
         } else if (req.getEndpoint().contains('/folders/') && req.getMethod() == 'POST') {
             res.setBody('{"id": "new_folder_id", "name": "New Folder", "type": "folder"}');
+            System.debug(type);
             if(type == 'success'){
              	res.setStatusCode(201);
                 return res;
@@ -135,7 +142,16 @@
                 res.setStatusCode(204);
                 return res;
             }
-         }
+        }
+         else if (req.getEndpoint().contains('/oauth2/revoke')) {
+            if (type == 'success') {
+                res.setStatusCode(200);  // Success response
+                res.setBody('{"message":"Token revoked successfully."}');
+            } else if (type == 'error') {
+                res.setStatusCode(400);  // Failure response
+                res.setBody('{"error":"invalid_token","error_description":"Invalid or expired token."}');
+            }
+        }
         if(type == 'success'){
             res.setStatusCode(200);
         } else{
@@ -146,3 +162,9 @@
         return res;
     }
 }
+
+            // if (mockResponseType == 'error') {
+            //     res.setBody('{"error":"server_error","error_description":"An internal error occurred"}');
+            //     res.setStatusCode(500);
+            // }         
+        

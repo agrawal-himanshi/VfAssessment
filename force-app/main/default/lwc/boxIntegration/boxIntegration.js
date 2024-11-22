@@ -11,7 +11,9 @@ import previewFile from '@salesforce/apex/BoxController.previewFile';
 import downloadFile from '@salesforce/apex/BoxController.downloadFile';
 import accessTokenWithRefreshToken from '@salesforce/apex/boxController.accessTokenWithRefreshToken';
 import createAuthURLForOtherAcc from '@salesforce/apex/boxController.createAuthURLForOtherAcc';
-//import getAllAccMailIds from '@salesforce/apex/boxController.getAllAccMailIds';
+import getAllAccMailIds from '@salesforce/apex/boxController.getAllAccMailIds';
+import getTokens from '@salesforce/apex/boxController.getTokens';
+import revokeBoxAccount from '@salesforce/apex/boxcontroller.revokeBoxAccount';
 
 export default class BoxIntegration extends LightningElement {
     myCustomIconUrl = boxIconResource;
@@ -26,8 +28,10 @@ export default class BoxIntegration extends LightningElement {
     @track viewUser = false;
     @track recordsPresent;
     @track folderAndFile;
+    @track storeFiles;
     @track isNotEmpty;
     @track expiresTime;
+    @track id;
     @track refreshToken;
     @track fetchedAccessToken;
     @track createFolderModal = false;
@@ -36,6 +40,8 @@ export default class BoxIntegration extends LightningElement {
     @track fileNameFromUi = '';
     @track fileContentFromUi;
     @track folderName;
+    @track ConnectedAccMailIds = [];
+    @track flag = false;
     clientId = 'mym7rb5cn43lnz9tnzd0gl6l65w0da9l';
     clientSecret = 'uzuMt3CPI2e2QarxKwy8UZwdBzW0h5nd';
 
@@ -85,21 +91,40 @@ export default class BoxIntegration extends LightningElement {
                     console.log(this.email);
                     console.log(this.fetchedAccessToken);
                     this.isLoading=false;
-                    this.connected = true; 
+                    this.connected = true;  
                     this.recordsPresent=true;
                     this.showCurrentFoldersAndFiles();
                     getAllAccMailIds()
                     .then(result => {
-                        this.ConnectedAccMailIds = result;
-                        if (this.ConnectedAccMailIds.length > 0) {
-                            this.email = this.ConnectedAccMailIds[0]; 
+                        console.log(result);
+                        console.log(this.email);
+                        console.log(this.ConnectedAccMailIds);
+                        console.log(result.length);
+                        
+                        if(result.length>1){
+                            this.flag = true;
+                        }else{
+                            this.flag = false;
                         }
+                        for(let i = 0; i< result.length;i++){
+                            console.log(result);
+                            if(result[i].user_mail__c === this.email){
+                                console.log(result[i].user_mail__c);
+                            }
+                            else{
+                                console.log('non-include id is:' + result[i].user_mail__c);
+                                this.ConnectedAccMailIds.push(result[i]);
+                            }
+                        }
+                        console.log(this.ConnectedAccMailIds);
                     })
                     userDetails({accessToken : this.fetchedAccessToken})
                     .then(user => {
+                        console.log(user);
                         this.username = user.username;
                         this.email = user.email;
-                        console.log('User details set:', this.username, this.email);
+                        this.id = user.id;
+                        console.log('User details set:', this.username, this.email, this.id);
                     })
                     .catch(error => {
                         console.error('Error retrieving user details:', error);
@@ -125,21 +150,40 @@ export default class BoxIntegration extends LightningElement {
                 this.showCurrentFoldersAndFiles();
                 getAllAccMailIds()
                 .then(result => {
-                    this.ConnectedAccMailIds = result;
+                    console.log(result);
+                    console.log(this.email);
+                    if(result.length>1){
+                        this.flag = true;
+                    }
+                    else{
+                        this.flag = false;
+                    }
+                    console.log(this.ConnectedAccMailIds);
+                    for(let i = 0; i< result.length;i++){
+                        console.log(result);
+                        if(result[i].user_mail__c === this.email){
+                            console.log(result[i].user_mail__c);
+                        }
+                        else{
+                            console.log('non-include id is:' + result[i].user_mail__c);
+                            this.ConnectedAccMailIds.push(result[i]);
+                        }
+                    }
+                    console.log(this.ConnectedAccMailIds);
                 })
                 userDetails({accessToken : this.fetchedAccessToken})
                 .then(user => {
+                    console.log(user);
                     this.username = user.username;
                     this.email = user.email;
-                    console.log('User details set:', this.username, this.email);
+                    this.id = user.id;
+                    console.log('User details set:', this.username, this.email, this.id);
                 })
-                .catch(error => {
-                    console.error('Error retrieving user details:', error);
-                });
             })
             .catch(error => {
-                this.isLoading=false;
-                //this.showToast('Error', error.body.message, 'error');
+                this.isLoading = false;
+                console.error('Error:', error);
+                // this.showToast('Error', error.body.message, 'error');
             });
         }
     }
@@ -151,29 +195,13 @@ export default class BoxIntegration extends LightningElement {
         .then(result=>{
             window.location.href = result;
             this.isLoading=false;
-            // getAccessToken({code: authcode})
-            // .then(result => {
-            //     this.email = result.email;  
-            //     this.username = result.username;
-            //     console.log(this.email);
-            //     this.isLoading=false;
-            //     this.recordsPresent=true;
-            //     // getAllAccMailIds()
-            //     // .then(result =>{
-            //     //     this.ConnectedAccMailIds = result;
-            //     // })
-            //     this.showCurrentFoldersAndFiles();  
-            // })            
-            // .catch(error => {
-            //     this.isLoading=false;
-            //     //this.showToast('Error', error.body.message, 'error');
-            // });
         })
         .catch(error => {
             this.isLoading = false;
             //this.showToast('Error', error.body.message, 'error');
         });
     }
+    
 
     showCurrentFoldersAndFiles(){
         this.isLoading=true;
@@ -205,6 +233,7 @@ export default class BoxIntegration extends LightningElement {
                                 window.location.href = result[0].redirectUri;
                             }
                             this.folderAndFile = result;
+                            this.storeFiles = result;
                             console.log('total no of object-->',result.length);  
                             this.isNotEmpty = true;      
                         }
@@ -231,6 +260,7 @@ export default class BoxIntegration extends LightningElement {
                         window.location.href = result[0].redirectUri;
                     }
                     this.folderAndFile = result;
+                    this.storeFiles = result;
                     console.log('total no of object-->',result.length);  
                     this.isNotEmpty = true;      
                 }
@@ -249,6 +279,9 @@ export default class BoxIntegration extends LightningElement {
         }
 
     handleDivClick(event) {
+        console.log(this.isLoading);
+        this.isLoading = true;
+        console.log(this.isLoading);
         let currentFolder = this.path[this.path.length-1].value;
         const div = event.currentTarget;
         if (this.lastClickedDiv && this.lastClickedDiv !== div) {
@@ -260,76 +293,67 @@ export default class BoxIntegration extends LightningElement {
         let folderId = event.currentTarget.dataset.id;
         console.log(folderId);
         if(folderId == 'files-section'){
-            this.showCurrentFoldersAndFiles();
+            this.folderAndFile = this.storeFiles;
             console.log('all folders/files');
         }
         else if(folderId == 'photos-section'){
-            getFilesANdFolders({accessToken : '', currentFolder : currentFolder, isNew : false, email:this.email})
-            .then(allFiles=>{
-                console.log(allFiles);
-                let result =[];
-                for(let i=0;i<allFiles.length;i++){
-                    if(allFiles[i].type == "doctype:image"){
-                        result.push(allFiles[i]);
-                    }
+            console.log(this.storeFiles);
+            let result =[];
+            for(let i=0;i<this.storeFiles.length;i++){
+                if(this.storeFiles[i].type == "doctype:image"){
+                    result.push(this.storeFiles[i]);
                 }
-                console.log(result);
-                if(result.length > 0){
-                    this.isNotEmpty = true; 
-                    this.folderAndFile = result;     
-                }
-                else{
-                    this.isNotEmpty = false;
-                }
-            })
+            }
+            console.log(result);
+            if(result.length > 0){
+                this.isNotEmpty = true; 
+                this.folderAndFile = result;     
+            }
+            else{
+                this.isNotEmpty = false;
+            }
             console.log('all photos');
         }
         else if(folderId == 'videos-section'){
-            getFilesANdFolders({accessToken : '', currentFolder : currentFolder, isNew : false, email:this.email})
-            .then(allFiles=>{
-                console.log(allFiles);
-                let result =[];
-                for(let i=0;i<allFiles.length;i++){
-                    if(allFiles[i].type == "doctype:video"){
-                        result.push(allFiles[i]);
-                    }
+            console.log(this.storeFiles);
+            let result =[];
+            for(let i=0;i<this.storeFiles.length;i++){
+                if(this.storeFiles[i].type == "doctype:video"){
+                    result.push(this.storeFiles[i]);
                 }
-                console.log(result);
-                if(result.length > 0){
-                    this.isNotEmpty = true; 
-                    this.folderAndFile = result;     
-                }
-                else{
-                    this.isNotEmpty = false;
-                }
-            })
+            }
+            console.log(result);
+            if(result.length > 0){
+                this.isNotEmpty = true; 
+                this.folderAndFile = result;     
+            }
+            else{
+                this.isNotEmpty = false;
+            }
             console.log('all videos');
         }
         else if(folderId == 'docs-section'){
-            getFilesANdFolders({accessToken : '', currentFolder : currentFolder, isNew : false, email:this.email})
-            .then(allFiles=>{
-                console.log(allFiles);
-                let result =[];
-                for(let i=0;i<allFiles.length;i++){
-                    console.log(allFiles[i].type);
-                    if(allFiles[i].type == "doctype:pdf" || allFiles[i].type == "doctype:doc" || allFiles[i].type == "doctype:docx" || allFiles[i].type == "doctype:ppt" || allFiles[i].type == "doctype:pptx"|| allFiles[i].type == "doctype:txt"|| allFiles[i].type == "doctype:csv"|| allFiles[i].type == "doctype:html"||  allFiles[i].type == "doctype:excel"){        
-                        result.push(allFiles[i]);
-                    }
+            console.log(this.storeFiles);
+            let result =[];
+            for(let i=0;i<this.storeFiles.length;i++){
+                if(this.storeFiles[i].type == "doctype:pdf" || this.storeFiles[i].type == "doctype:doc" || this.storeFiles[i].type == "doctype:docx" || this.storeFiles[i].type == "doctype:ppt" || this.storeFiles[i].type == "doctype:pptx"|| this.storeFiles[i].type == "doctype:txt"|| this.storeFiles[i].type == "doctype:csv"|| this.storeFiles[i].type == "doctype:html"||  this.storeFiles[i].type == "doctype:excel"){        
+                    result.push(this.storeFiles[i]);
                 }
-                console.log(result);
-                if(result.length > 0){
-                    this.isNotEmpty = true; 
-                    this.folderAndFile = result;     
-                }
-                else{
-                    this.isNotEmpty = false;
-                }
-            })
+            }
+            console.log(result);
+            if(result.length > 0){
+                this.isNotEmpty = true; 
+                this.folderAndFile = result;     
+            }
+            else{
+                this.isNotEmpty = false;
+            }
             console.log('all documents');
         }
         else{
-            this.showCurrentFoldersAndFiles();
+            this.folderAndFile = this.storeFiles;
         }
+        this.isLoading = false;
     }
 
     viewUserDetails(){
@@ -343,13 +367,45 @@ export default class BoxIntegration extends LightningElement {
         }
     }
 
-    // hideviewUser(){
-    //     this.viewUser = false;
-    //     this.togglePointerEvents(false); // Enable pointer events when modal is closed
-    // }
+    handleEmailClick(event) {
+        this.isLoading = true;
+        this.email = event.target.dataset.email; 
+        console.log(this.email);
+        getTokens({mailId : this.email})
+        .then(result => {
+            console.log(result);
+            this.fetchedAccessToken = result.Access_Token__c;
+            console.log(this.fetchedAccessToken);
+            userDetails({accessToken : this.fetchedAccessToken})
+            .then(user => {
+                console.log(user);
+                this.username = user.username;
+                this.email = user.email;
+                this.id = user.id;
+                console.log('User details set:', this.username, this.email, this.id);
+            })
+            getAllAccMailIds()
+            .then(result => {
+                console.log(result);
+                console.log(this.email);
+                if(result.length>1){
+                    this.flag = true;
+                }
+                else{
+                    this.flag = false;
+                }
+                console.log(this.ConnectedAccMailIds);
+                this.ConnectedAccMailIds = result.filter(email => email.user_mail__c !== this.email);
+                console.log(this.ConnectedAccMailIds);
+            })
+            this.showCurrentFoldersAndFiles();
+            this.isLoading = false;
+        })
+    }
 
     // dowload a file
     fileDownload(event) {
+        this.isLoading = true;
         console.log('download link');
         let folderId = event.currentTarget.dataset.id;    
         console.log(folderId);  
@@ -368,6 +424,7 @@ export default class BoxIntegration extends LightningElement {
 
     // preview a file 
     filePreview(event) {
+        this.isLoading = true;
         console.log('preview link');
         let folderId = event.currentTarget.dataset.id;
         console.log(folderId);
@@ -419,14 +476,14 @@ export default class BoxIntegration extends LightningElement {
     }
 
     get isCreateDisabled() {
-        if(this.newFolderName ==''){
+        // if(this.newFolderName ==''){
+        if (!this.newFolderName || this.newFolderName.trim() === '') {
             return true;
         }
         else{
             return false;
         }
     }
-
 
     createFolder() {
         this.isLoading = true;
@@ -446,6 +503,9 @@ export default class BoxIntegration extends LightningElement {
     }
 
     hideUploadFolderModal(){
+        this.fileNameFromUi = '';
+        this.fileContentFromUi = null;
+        this.type = '';
         this.uploadFileModal = false;
         this.togglePointerEvents(false); // Enable pointer events when modal is closed
     }
@@ -578,6 +638,31 @@ export default class BoxIntegration extends LightningElement {
         .catch(error => {
             this.isLoading=false
             //this.showToast('Error', error.body.message, 'error');
+        });
+    }
+
+    logOutUser() {
+        console.log('Logging out user with email:', this.email);
+        this.isLoading = true;
+        this.revokeAccess(this.email);
+    }
+    revokeAccess(email) {
+        console.log(email);
+        revokeBoxAccount({mailId: email})
+        .then(result => {
+            console.log(result);
+            if (result === 'Success') {
+                console.log('Account revoked successfully.');
+                this.isLoading = false;
+                window.location.reload();
+            } 
+            else {
+                this.isLoading = false;
+                console.error(result);
+            }
+        })
+        .catch(error => {
+            console.error('Error revoking account:', error);
         });
     }
 
