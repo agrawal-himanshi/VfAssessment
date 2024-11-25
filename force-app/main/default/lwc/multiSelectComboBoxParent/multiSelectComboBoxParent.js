@@ -6,38 +6,34 @@ import { getPicklistValues, getObjectInfo } from 'lightning/uiObjectInfoApi';
 
 export default class MultiSelectComboBoxParent extends LightningElement {
  
-    options;
+    @track options = [];
     toggleEnabled ='false';
     accountRecordTypeId;
 
     @wire(getObjectInfo, { objectApiName: ACCOUNT_OBJECT })
     results({ error, data }) {
         if (data) {
-        this.accountRecordTypeId = data.defaultRecordTypeId;
+            this.accountRecordTypeId = data.defaultRecordTypeId;
         } else if (error) {
-        this.error = error;
+            this.error = error;
         }
     }
 
     @wire(getPicklistValues, { recordTypeId: "$accountRecordTypeId", fieldApiName: TYPE_FIELD})
     picklistResults({ error, data }) {
         if (data) {
-        this.options = data.values;
-        console.log(this.options);
+            this.options = data.values;
+            console.log(this.options);
+            if (this.options) {
+                this.options.forEach(option => {
+                    console.log('Picklist option:', option.label, option.value);
+                });
+            }
+            console.log(this.options);
         } else if (error) {
-        this.error = error;
+            this.error = error;
         }
     }
-    
-    // @track options = [
-    //     { label: 'Prospect', value: 'Prospect' },
-    //     { label: 'Customer - Direct', value: 'Customer - Direct' },
-    //     { label: 'Customer - Channel', value: 'Customer - Channel' },
-    //     { label: 'Channel Partner / Reseller', value: 'Channel Partner / Reseller' },
-    //     { label: 'Installation Partner', value: 'Installation Partner' },
-    //     { label: 'Technology Partner', value: 'Technology Partner' },
-    //     { label: 'Other', value: 'Other' }
-    // ];
     
     toggleSelectionType(event) {
         let toggleValue = event.target.checked;
