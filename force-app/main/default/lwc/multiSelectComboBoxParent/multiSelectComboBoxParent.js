@@ -1,7 +1,6 @@
 import { LightningElement, track, wire } from 'lwc';
 import ACCOUNT_OBJECT from '@salesforce/schema/Account';
 import TYPE_FIELD from '@salesforce/schema/Account.Type';
-// import RATING_FIELD from "@salesforce/schema/Account.Rating";
 import { getPicklistValues, getObjectInfo } from 'lightning/uiObjectInfoApi';
 
 export default class MultiSelectComboBoxParent extends LightningElement {
