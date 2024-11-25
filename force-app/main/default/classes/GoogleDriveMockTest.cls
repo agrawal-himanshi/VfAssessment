@@ -51,6 +51,13 @@ global class GoogleDriveMockTest implements HttpCalloutMock {
             }
             return res;
         }
+        if (req.getEndpoint().contains('/oauth2/v4/token')) {
+          if (responseType == 'success') {
+                res.setStatusCode(200);  // Success on valid request
+				res.setBody('{"access_token": "test_access_token", "refresh_token": "", "expires_in": 3600}');
+            } 
+            return res;
+        }
 
         // User details request (People API)
         if (req.getEndpoint().contains('people.googleapis.com')) {
@@ -89,6 +96,16 @@ global class GoogleDriveMockTest implements HttpCalloutMock {
             } else {
                 res.setStatusCode(204);  // Success on subsequent delete (No Content)
                 res.setBody('');  // No content for successful delete
+            }
+            return res;
+        }
+        if (req.getEndpoint().contains('/oauth2/revoke')) {
+            if (responseType == 'success') {
+                res.setStatusCode(200);  // Success response
+                res.setBody('{"message":"Token revoked successfully."}');
+            } else if (responseType == 'error') {
+                res.setStatusCode(400);  // Failure response
+                res.setBody('{"error":"invalid_token","error_description":"Invalid or expired token."}');
             }
             return res;
         }

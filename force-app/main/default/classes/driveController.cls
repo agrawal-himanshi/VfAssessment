@@ -333,7 +333,8 @@ public with sharing class driveController {
     @AuraEnabled
     public static String revokeGoogleDriveAccount(String IdOfRecord) {
         try {
-            Integration_Access__c record = [SELECT Access_Token__c FROM Integration_Access__c WHERE Id = :IdOfRecord LIMIT 1];
+            Integration_Access__c record = database.query('SELECT Access_Token__c FROM Integration_Access__c WHERE Id = \''+IdOfRecord+'\' AND Record_Type__c = \'GOOGLE DRIVE\' LIMIT 1');
+            //Integration_Access__c record = [SELECT Access_Token__c FROM Integration_Access__c WHERE Id = :IdOfRecord LIMIT 1];
             IntegrationWrapperClass res = GoogleDriveServiceClass.revokeToken(record.Access_Token__c);
             system.debug(res.responseStatusCode);
             if(res.responseStatusCode == '200'){   
@@ -412,10 +413,11 @@ public with sharing class driveController {
         Integration_Access__c record;
         if(mailId!=null) {
             try {
-                record = [SELECT Id, Access_Token__c, Refresh_Token__c, Expire_In_Time__c,user_mail__c 
-                    FROM Integration_Access__c 
-                    WHERE user_mail__c= :mailId AND Record_Type__c = 'GOOGLE DRIVE'
-                    LIMIT 1];
+                record = database.query('SELECT Id, Access_Token__c, Refresh_Token__c, Expire_In_Time__c ,user_mail__c FROM Integration_Access__c WHERE user_mail__c = \'' + mailId + '\' AND Record_Type__c = \'GOOGLE DRIVE\' LIMIT 1');
+                //record = [SELECT Id, Access_Token__c, Refresh_Token__c, Expire_In_Time__c,user_mail__c 
+                    //FROM Integration_Access__c 
+                   // WHERE user_mail__c= :mailId AND Record_Type__c = 'GOOGLE DRIVE'
+                   // LIMIT 1];
             } 
             catch (QueryException e) {
                 system.debug('No Integration Access record found or an error occurred: ' + e.getMessage());
@@ -450,10 +452,11 @@ public with sharing class driveController {
             Integration_Access__c myCustomObject;
             if(mailId!=null){
                 try {
-                    myCustomObject = [SELECT Id, Access_Token__c, Refresh_Token__c, Expire_In_Time__c ,user_mail__c
-                                    FROM Integration_Access__c 
-                                    WHERE user_mail__c = :mailId 
-                                    LIMIT 1];
+                    myCustomObject = database.query('SELECT Id, Access_Token__c, Refresh_Token__c, Expire_In_Time__c ,user_mail__c FROM Integration_Access__c WHERE user_mail__c = \'' + mailId + '\' AND Record_Type__c = \'GOOGLE DRIVE\' LIMIT 1');
+                   // myCustomObject = [SELECT Id, Access_Token__c, Refresh_Token__c, Expire_In_Time__c ,user_mail__c
+                              //      FROM Integration_Access__c 
+                                 //   WHERE user_mail__c = :mailId 
+                                  //  LIMIT 1];
                 } 
                 catch (QueryException e) {
                     system.debug('No Integration_Access__c record found for: ' + mailId);
