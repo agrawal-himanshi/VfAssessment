@@ -23,12 +23,6 @@ export default class MultiSelectComboBoxParent extends LightningElement {
         if (data) {
             this.options = data.values;
             console.log(this.options);
-            if (this.options) {
-                this.options.forEach(option => {
-                    console.log('Picklist option:', option.label, option.value);
-                });
-            }
-            console.log(this.options);
         } else if (error) {
             this.error = error;
         }
