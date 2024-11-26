@@ -5,7 +5,7 @@ import { getPicklistValues, getObjectInfo } from 'lightning/uiObjectInfoApi';
 
 export default class MultiSelectComboBoxParent extends LightningElement {
  
-    @track options = [];
+    options = [];
     toggleEnabled = false;
     accountRecordTypeId;
 
