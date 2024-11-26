@@ -8,16 +8,15 @@ export default class MultiSelectComboBoxChild extends LightningElement {
     @api label;
     @api disabled = false;
     @api multiSelect = false;
-    value;
+    
     @track values = [];
     @track optionData;
     searchString;
     message;
+    value;
     showDropdown = false;
 
     connectedCallback() {
-        this.showDropdown = false;
-        console.log(this.options);
         var optionData = this.options;
         var value = this.selectedValue;
         var values = this.selectedValues;
@@ -45,6 +44,7 @@ export default class MultiSelectComboBoxChild extends LightningElement {
         this.values = values;
         this.optionData = optionData;
     }
+
     showOptions() {
         if(this.disabled == false && this.options) {
             this.message = '';
@@ -59,6 +59,7 @@ export default class MultiSelectComboBoxChild extends LightningElement {
             this.optionData = options;
         }
     }
+
     selectItem(event) {
         var selectedVal = event.currentTarget.dataset.id;
         if(selectedVal) {
@@ -92,6 +93,7 @@ export default class MultiSelectComboBoxChild extends LightningElement {
                 this.showDropdown = false;
         }
     }
+
     filterOptions(event) {
         this.searchString = event.target.value;
         if( this.searchString && this.searchString.length > 0 ) {
@@ -111,7 +113,15 @@ export default class MultiSelectComboBoxChild extends LightningElement {
                 }
             }
             this.showDropdown = true;
-        } else {
+        } 
+        else if(this.searchString.length === 0) {
+            for(var i = 0; i < this.optionData.length; i++) {
+                this.optionData[i].isVisible = true;
+            }
+            this.showDropdown = true;
+            console.log('true for 0' + this.showDropdown);
+        }
+        else {
             this.showDropdown = false;
         }
     }

@@ -6,7 +6,7 @@ import { getPicklistValues, getObjectInfo } from 'lightning/uiObjectInfoApi';
 export default class MultiSelectComboBoxParent extends LightningElement {
  
     @track options = [];
-    toggleEnabled ='false';
+    toggleEnabled = false;
     accountRecordTypeId;
 
     @wire(getObjectInfo, { objectApiName: ACCOUNT_OBJECT })
@@ -29,6 +29,8 @@ export default class MultiSelectComboBoxParent extends LightningElement {
     }
     
     toggleSelectionType(event) {
+        console.log(this.toggleEnabled);
+        console.log(event.target.checked);        
         let toggleValue = event.target.checked;
         this.toggleEnabled = toggleValue;
     }
