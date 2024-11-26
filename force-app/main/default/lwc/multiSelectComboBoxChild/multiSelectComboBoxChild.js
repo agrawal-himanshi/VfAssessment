@@ -3,17 +3,19 @@ import { LightningElement, track, api } from 'lwc';
 export default class MultiSelectComboBoxChild extends LightningElement {
      
     @api options;
-    @api selectedValue;
-    @api selectedValues = [];
     @api label;
-    @api disabled = false;
     @api multiSelect = false;
-    
     @track values = [];
     @track optionData;
     searchString;
     message;
     value;
+    selectedValue;
+    selectedValues = [];
+    disabled = false;
+    selectedValue;
+    selectedValues = [];
+    disabled = false;
     showDropdown = false;
 
     connectedCallback() {
