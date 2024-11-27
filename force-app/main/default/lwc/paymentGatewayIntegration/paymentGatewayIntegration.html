@@ -1,0 +1,70 @@
+<template>
+    <div class="slds-align--absolute-center slds-p-around--large wholePage">
+        <div class="slds-p-around--medium box"> 
+            <div>
+                <img src={myCustomIconUrl} alt="Authorize.Net" class="image"/>
+            </div>
+            <div class="slds-p-around--medium body">
+                <div class="slds-text-heading--medium">
+                    <span>Select Payment Method</span>
+                </div>
+                <div class="slds-grid slds-m-left_medium slds-m-top--x-small payOptions">
+                    <div onclick={checkMe} style="padding: 5px;">
+                        <lightning-icon icon-name="utility:card_details" alternative-text="Credit Card" size="x-small"></lightning-icon>
+                        <span> Credit Card </span>
+                    </div>
+                    <div onclick={checkMe} class="slds-m-left--large" style="padding: 5px;">
+                        <lightning-icon icon-name="utility:currency" alternative-text="E-Check" size="x-small"></lightning-icon>
+                        <span> E-Check </span>
+                    </div>
+                </div>
+                <template if:true={show}>
+                    <div class="slds-m-top--medium slds-m-right_xx-large slds-m-left--medium">
+                        <div>
+                            <lightning-input type="tel" name="routing" label="Routing Number" placeholder="Enter Routing Number" data-required maxlength="9" minlength="9" onchange={handleChange}></lightning-input>
+                        </div>
+                        <div>
+                            <lightning-input type="tel" name="account" label="Account Number" placeholder="Enter Account Number" data-required maxlength="9" minlength="9" onchange={handleChange}></lightning-input>
+                        </div>
+                        <div>
+                            <lightning-input type="text" name="name" label="Name On Account" placeholder="Enter Name" data-required onchange={handleChange}></lightning-input>
+                        </div>
+                    </div>
+                </template>
+                <template if:false={show}>
+                    <div class="slds-m-top--medium slds-m-right_xx-large slds-m-left--medium">
+                        <div>
+                            <lightning-input type="tel" name="card" label="Card Number" placeholder="5234 **** **** XXXX" data-required maxlength="16" minlength="12" onchange={handleChange}></lightning-input>
+                        </div>
+                        <div class="slds-grid slds-gutters grid">
+                            <div class="slds-col slds-size_1-of-4">
+                                <span>
+                                    <div>
+                                        <lightning-combobox  placeholder="-Month-" name="month" label="Expiry Month" data-required value={monthSelected} onchange={handleChange} options={monthOptions} ></lightning-combobox>
+                                    </div>
+                                </span>
+                            </div>
+                            <div class="slds-col slds-size_1-of-4">
+                                <span>
+                                    <div>
+                                        <lightning-combobox  placeholder="-Year-" name="year" label="Expiry Year" data-required value={yearSelected} onchange={handleChange} options={yearOptions} ></lightning-combobox>
+                                    </div>
+                                </span>
+                            </div>
+                            <div class="slds-col slds-size_2-of-4">
+                                <span>
+                                    <div>
+                                        <lightning-input type="password" name="cvv" label="CVV Number" placeholder="***" maxlength="3" data-required onchange={handleChange}></lightning-input>
+                                    </div>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+                <div class="slds-m-top--large">
+                    <lightning-button variant="success" label="Place Order" stretch></lightning-button>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>

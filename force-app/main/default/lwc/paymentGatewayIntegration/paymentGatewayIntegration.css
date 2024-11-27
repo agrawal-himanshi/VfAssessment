@@ -1,0 +1,29 @@
+.wholePage{
+    background-color: rgb(246, 242, 242);
+}
+
+.box{
+    background-color: rgb(233, 230, 230);
+    width: 50vw;
+}
+
+.image{
+    height: 20vh;
+    width: 48vw;
+}
+
+.body{
+    background-color: white;
+}
+
+.payOptions{
+    cursor: pointer;
+    font-size: 15px;
+}
+
+.highlighted {
+    background-color: black;
+    color: white;
+    border-radius: 5px;
+
+}
