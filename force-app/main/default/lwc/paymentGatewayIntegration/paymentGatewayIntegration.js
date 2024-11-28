@@ -82,11 +82,11 @@ export default class PaymentGatewayIntegration extends LightningElement {
         console.log('Button Clicked');
         if(this.show){
             console.log(this.show);
-            this.authECheckPayment();
+            this.authCardPayment();           
         }
         else{
             console.log(this.show); 
-            this.authCardPayment();           
+            this.authECheckPayment();
         }
     }
 
@@ -101,12 +101,13 @@ export default class PaymentGatewayIntegration extends LightningElement {
             if (!field.value) {
                 missingFields.push(field.label);
                 allValid = false;
+                console.log(missingFields);
                 console.log('Fields Value are not valid')
             }
         });
         if(allValid){
             alert('successfull');
-            // authECheckPayment({
+            // ECheckPayment({
             //             routingNumber: this.routingNumber,          
             //             accountNumber: this.accountNumber,
             //             nameOnAccount: this.nameOnAccount
@@ -118,9 +119,9 @@ export default class PaymentGatewayIntegration extends LightningElement {
             //     .catch( error => { 
             //         this.showToast('Error', error.body.message, 'error');
             //     });
-            }
+        }
         else{
-            alert('All Fields are Required');
+            alert('All Fields are Required (Missing fileds are :' + missingFields + ')');
         }
     }
 
@@ -140,7 +141,10 @@ export default class PaymentGatewayIntegration extends LightningElement {
         });
         if(allValid){
             alert('successfull');
-            }
+            // cardPayment({
+
+            // });
+        }
         else{
             alert('All Fields are Required');
         }

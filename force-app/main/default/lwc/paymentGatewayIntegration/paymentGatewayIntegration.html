@@ -9,7 +9,7 @@
                     <span>Select Payment Method</span>
                 </div>
                 <div class="slds-grid slds-m-left_medium slds-m-top--x-small payOptions">
-                    <div onclick={checkMe}>
+                    <div>
                         <template if:true={show}>
                             <div class="highlighted" style="padding: 5px;">
                                 <lightning-icon icon-name="utility:card_details" alternative-text="Credit Card" size="x-small"></lightning-icon>
@@ -17,15 +17,25 @@
                             </div>
                         </template>
                         <template if:false={show}>
-                            <div style="padding: 5px;">
+                            <div style="padding: 5px; cursor: pointer;" onclick={checkMe}>
                                 <lightning-icon icon-name="utility:card_details" alternative-text="Credit Card" size="x-small"></lightning-icon>
                                 <span> Credit Card </span>
                             </div>
                         </template>
                     </div>
-                    <div onclick={checkMe} class="slds-m-left--large" style="padding: 5px;">
-                        <lightning-icon icon-name="utility:currency" alternative-text="E-Check" size="x-small"></lightning-icon>
-                        <span> E-Check </span>
+                    <div class="slds-m-left--large">
+                        <template if:false={show}>
+                            <div class="highlighted" style="padding: 5px;">
+                                <lightning-icon icon-name="utility:currency" alternative-text="E-Check" size="x-small"></lightning-icon>
+                                <span> E-Check </span>
+                            </div>
+                        </template>
+                        <template if:true={show}>
+                            <div style="padding: 5px; cursor: pointer;" onclick={checkMe}>
+                                <lightning-icon icon-name="utility:currency" alternative-text="E-Check" size="x-small"></lightning-icon>
+                                <span> E-Check </span>
+                            </div>
+                        </template>
                     </div>
                 </div>
                 <template if:false={show}>
