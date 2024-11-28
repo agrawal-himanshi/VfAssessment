@@ -1,6 +1,6 @@
 public with sharing class PaymentGatewayService {
 
-    public static IntegrationWrapperClass AuthorizeApi(String body) {
+    public static IntegrationWrapperClass authorizeApi(String body) {
         Http h = new Http();
         HttpRequest req = new HttpRequest();
         req.setEndpoint('https://apitest.authorize.net/xml/v1/request.api');

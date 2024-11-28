@@ -51,7 +51,7 @@ public with sharing class PaymentGatewayIntegration {
             payBody.writeEndObject();
             payBody.writeEndObject();
 
-            IntegrationWrapperClass response = PaymentGatewayService.AuthorizeApi(payBody.getAsString());
+            IntegrationWrapperClass response = PaymentGatewayService.authorizeApi(payBody.getAsString());
             if(response.responseStatusCode == '200') {
                 if(response.responseBody.substringBetween('"resultCode":"', '"') == 'Ok') {
                     return response.responseBody.substringBetween('"description":"', '"');
@@ -77,7 +77,7 @@ public with sharing class PaymentGatewayIntegration {
             String email = 'test@g.com';
             String loginId = metadata.AppKey__c; // these get from authurize.net sandbox account tab
             String transactionKey = metadata.AppSecret__c;// these get from authurize.net sandbox account tab
-            String amount = '500';
+            String amount = '5';
             //create JSON body JSON Genertor
             JSONGenerator payBody = JSON.createGenerator(true);
             payBody.writeStartObject();//1
@@ -108,7 +108,7 @@ public with sharing class PaymentGatewayIntegration {
             payBody.writeStringField('accountNumber', accountNumber);
             payBody.writeStringField('nameOnAccount', nameOnAccount);
             payBody.writeEndObject();
-            
+
             payBody.writeEndObject();
             
             payBody.writeFieldName('customer');
@@ -121,7 +121,7 @@ public with sharing class PaymentGatewayIntegration {
             payBody.writeEndObject();
             payBody.writeEndObject();
 
-            IntegrationWrapperClass response = PaymentGatewayService.AuthorizeApi(payBody.getAsString());
+            IntegrationWrapperClass response = PaymentGatewayService.authorizeApi(payBody.getAsString());
             if(response.responseStatusCode == '200') {
                 if(response.responseBody.substringBetween('"resultCode":"', '"') == 'Ok') {
                     return response.responseBody.substringBetween('"description":"', '"');

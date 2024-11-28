@@ -56,8 +56,8 @@
                         <div>
                             <lightning-input type="tel" name="card" label="Card Number" placeholder="5234 **** **** XXXX" data-required maxlength="16" minlength="12" onchange={handleChange}></lightning-input>
                         </div>
-                        <div class="slds-grid slds-gutters grid">
-                            <div class="slds-col slds-size_1-of-4">
+                        <div class="slds-grid">
+                            <div class="slds-col slds-size_1-of-4 slds-m-right--medium">
                                 <span>
                                     <div>
                                         <lightning-combobox  placeholder="-Month-" name="month" label="Expiry Month" data-required value={monthSelected} onchange={handleChange} options={monthOptions} ></lightning-combobox>
@@ -71,13 +71,13 @@
                                     </div>
                                 </span>
                             </div>
-                            <div class="slds-col slds-size_2-of-4">
-                                <span>
-                                    <div>
-                                        <lightning-input type="password" name="cvv" label="CVV Number" placeholder="***" maxlength="3" data-required onchange={handleChange}></lightning-input>
-                                    </div>
-                                </span>
-                            </div>
+                        </div>
+                        <div class="slds-col slds-size_2-of-4">
+                            <span>
+                                <div>
+                                    <lightning-input type="password" name="cvv" label="CVV Number" placeholder="***" maxlength="3" data-required onchange={handleChange}></lightning-input>
+                                </div>
+                            </span>
                         </div>
                     </div>
                 </template>

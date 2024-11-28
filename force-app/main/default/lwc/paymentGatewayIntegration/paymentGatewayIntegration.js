@@ -18,7 +18,6 @@ export default class PaymentGatewayIntegration extends LightningElement {
     cardYear = '';
     cvv = '';
 
-
     monthOptions = [
         { label: 'January', value: '01' },
         { label: 'February', value: '02' },
@@ -59,36 +58,36 @@ export default class PaymentGatewayIntegration extends LightningElement {
     handleChange(event){
         if (event.target.name == 'routing') {
             this.routingNumber = event.detail.value;
-            console.log(this.routingNumber);
+            //console.log(this.routingNumber);
         } else if (event.target.name == 'account') {
             this.accountNumber = event.detail.value;
-            console.log(this.accountNumber);
+            //console.log(this.accountNumber);
         } else if (event.target.name == 'name') {
             this.nameOnAccount = event.detail.value;
-            console.log(this.nameOnAccount);
+            //console.log(this.nameOnAccount);
         } else if(event.target.name == 'card') {
             this.cardNumber = event.detail.value;
-            console.log(this.cardNumber);
+            //console.log(this.cardNumber);
         } else if(event.target.name == 'month') {
             this.cardMonth = event.detail.value;
-            console.log(this.cardMonth);
+            //console.log(this.cardMonth);
         } else if(event.target.name == 'year') {
             this.cardYear = event.detail.value;
-            console.log(this.cardYear);
+            //console.log(this.cardYear);
         } else if(event.target.name == 'cvv') {
             this.cvv = event.detail.value;
-            console.log(this.cvv);
+            //console.log(this.cvv);
         }
     }
 
     handleBtnClick(){
         console.log('Button Clicked');
         if(this.show){
-            console.log(this.show);
+            //console.log(this.show);
             this.authCardPayment();           
         }
         else{
-            console.log(this.show); 
+           // console.log(this.show); 
             this.authECheckPayment();
         }
     }
@@ -109,7 +108,6 @@ export default class PaymentGatewayIntegration extends LightningElement {
             }
         });
         if(allValid){
-            alert('successfull');
             eCheckPayment({
                     routingNumber: this.routingNumber,          
                     accountNumber: this.accountNumber,
@@ -143,7 +141,6 @@ export default class PaymentGatewayIntegration extends LightningElement {
             }
         });
         if(allValid){
-            alert('successfull');
             cardPayment({
                 cardNumber: this.cardNumber,
                 cardMonth: this.cardMonth,

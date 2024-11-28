@@ -1,5 +1,5 @@
 .wholePage{
-    background-color: rgb(246, 242, 242);
+    background-color: rgb(218 212 212);
     height: 80vh;
 }
 
@@ -22,7 +22,7 @@
 }
 
 .highlighted {
-    background-color: black;
+    background-color: rgb(29 76 134);
     color: white;
     border-radius: 5px;
 
