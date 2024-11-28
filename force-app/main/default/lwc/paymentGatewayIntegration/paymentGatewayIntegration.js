@@ -6,6 +6,15 @@ export default class PaymentGatewayIntegration extends LightningElement {
 
     show = true;
     lastClickedDiv = null;  
+    routingNumber = ''; 
+    accountNumber = ''; 
+    nameOnAccount = ''; 
+    errorMessage = ''; 
+    cardNumber = '';
+    cardMonth = ''; 
+    cardYear = '';
+    cvv = '';
+
 
     monthOptions = [
         { label: 'January', value: '01' },
@@ -39,8 +48,102 @@ export default class PaymentGatewayIntegration extends LightningElement {
         }
         div.classList.toggle('highlighted');
         this.lastClickedDiv = div;
+        console.log(this.lastClickedDiv);
         console.log("Div clicked, performing action...");
         this.show = ! this.show;
+    }
+
+    handleChange(event){
+        if (event.target.name == 'routing') {
+            this.routingNumber = event.detail.value;
+            console.log(this.routingNumber);
+        } else if (event.target.name == 'account') {
+            this.accountNumber = event.detail.value;
+            console.log(this.accountNumber);
+        } else if (event.target.name == 'name') {
+            this.nameOnAccount = event.detail.value;
+            console.log(this.nameOnAccount);
+        } else if(event.target.name == 'card') {
+            this.cardNumber = event.detail.value;
+            console.log(this.cardNumber);
+        } else if(event.target.name == 'month') {
+            this.cardMonth = event.detail.value;
+            console.log(this.cardMonth);
+        } else if(event.target.name == 'year') {
+            this.cardYear = event.detail.value;
+            console.log(this.cardYear);
+        } else if(event.target.name == 'cvv') {
+            this.cvv = event.detail.value;
+            console.log(this.cvv);
+        }
+    }
+
+    handleBtnClick(){
+        console.log('Button Clicked');
+        if(this.show){
+            console.log(this.show);
+            this.authECheckPayment();
+        }
+        else{
+            console.log(this.show); 
+            this.authCardPayment();           
+        }
+    }
+
+    authECheckPayment(){
+        console.log('in echeck');
+        const requiredFields = this.template.querySelectorAll('[data-required]');
+        console.log(requiredFields);
+        let allValid = true;
+        let missingFields = [];
+
+        requiredFields.forEach(field => {
+            if (!field.value) {
+                missingFields.push(field.label);
+                allValid = false;
+                console.log('Fields Value are not valid')
+            }
+        });
+        if(allValid){
+            alert('successfull');
+            // authECheckPayment({
+            //             routingNumber: this.routingNumber,          
+            //             accountNumber: this.accountNumber,
+            //             nameOnAccount: this.nameOnAccount
+            //     })
+            //     .then( result => {     
+            //         let title = result;               
+            //         this.showToast('Success', title, 'success');
+            //     })
+            //     .catch( error => { 
+            //         this.showToast('Error', error.body.message, 'error');
+            //     });
+            }
+        else{
+            alert('All Fields are Required');
+        }
+    }
+
+    authCardPayment(){
+        console.log('in card');
+        const requiredFields = this.template.querySelectorAll('[data-required]');
+        console.log(requiredFields);
+        let allValid = true;
+        let missingFields = [];
+
+        requiredFields.forEach(field => {
+            if (!field.value) {
+                missingFields.push(field.label);
+                allValid = false;
+                console.log('Fields Value are not valid')
+            }
+        });
+        if(allValid){
+            alert('successfull');
+            }
+        else{
+            alert('All Fields are Required');
+        }
     }
 
 
