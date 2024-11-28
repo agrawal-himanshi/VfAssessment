@@ -1,5 +1,8 @@
 import { LightningElement } from 'lwc';
 import paymentAuthorize from '@salesforce/resourceUrl/paymentAuthorize';
+import eCheckPayment from '@salesforce/apex/paymentGatewayIntegration.eCheckPayment';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import cardPayment from '@salesforce/apex/paymentGatewayIntegration.cardPayment';
 
 export default class PaymentGatewayIntegration extends LightningElement {
     myCustomIconUrl = paymentAuthorize;
@@ -107,18 +110,18 @@ export default class PaymentGatewayIntegration extends LightningElement {
         });
         if(allValid){
             alert('successfull');
-            // ECheckPayment({
-            //             routingNumber: this.routingNumber,          
-            //             accountNumber: this.accountNumber,
-            //             nameOnAccount: this.nameOnAccount
-            //     })
-            //     .then( result => {     
-            //         let title = result;               
-            //         this.showToast('Success', title, 'success');
-            //     })
-            //     .catch( error => { 
-            //         this.showToast('Error', error.body.message, 'error');
-            //     });
+            eCheckPayment({
+                    routingNumber: this.routingNumber,          
+                    accountNumber: this.accountNumber,
+                    nameOnAccount: this.nameOnAccount
+            })
+            .then( result => {     
+                let title = result;               
+                this.showToast('Success', title, 'success');
+            })
+            .catch( error => { 
+                this.showToast('Error', error.body.message, 'error');
+            });
         }
         else{
             alert('All Fields are Required (Missing fileds are :' + missingFields + ')');
@@ -141,15 +144,33 @@ export default class PaymentGatewayIntegration extends LightningElement {
         });
         if(allValid){
             alert('successfull');
-            // cardPayment({
-
-            // });
+            cardPayment({
+                cardNumber: this.cardNumber,
+                cardMonth: this.cardMonth,
+                cardYear: this.cardYear,
+                cvv: this.cvv
+            })
+            .then(result => {
+                console.log('card payment successful');
+                let title = result;               
+                this.showToast('Success', title, 'success');
+            })
+            .catch(error => {
+                this.showToast('Error', error.body.message, 'error');
+            });
         }
         else{
-            alert('All Fields are Required');
+            alert('All Fields are Required (Missing fileds are :' + missingFields + ')');
         }
     }
 
-
+    showToast(title, message, variant) {
+        const event = new ShowToastEvent({
+            title : title,
+            message : message,
+            variant : variant,
+        });
+        this.dispatchEvent(event);
+    }
 
 }
