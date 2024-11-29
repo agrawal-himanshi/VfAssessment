@@ -49,6 +49,9 @@
                         <div>
                             <lightning-input type="text" name="name" label="Name On Account" placeholder="Enter Name" data-required onchange={handleChange}></lightning-input>
                         </div>
+                        <div class="slds-m-top--large ">
+                            <lightning-button variant="success" label="Place Order" onclick={handleBtnClick} stretch></lightning-button>
+                        </div>
                     </div>
                 </template>
                 <template if:true={show}>
@@ -79,11 +82,11 @@
                                 </div>
                             </span>
                         </div>
+                        <div class="slds-m-top--large ">
+                            <lightning-button variant="success" label="Place Order" onclick={handleBtnClick} stretch></lightning-button>
+                        </div>
                     </div>
                 </template>
-                <div class="slds-m-top--large ">
-                    <lightning-button variant="success" label="Place Order" onclick={handleBtnClick} stretch></lightning-button>
-                </div>
             </div>
         </div>
     </div>
