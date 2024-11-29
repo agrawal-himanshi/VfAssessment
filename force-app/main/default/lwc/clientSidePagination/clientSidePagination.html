@@ -1,0 +1,66 @@
+
+<template>
+    <div style="background-color: #fff; position: relative;" class="slds-p-around_medium">
+        <div if:true={showSpinner}>
+            <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+        </div>
+        <lightning-accordion class="pagination-accordion" active-section-name="A">
+
+            <lightning-accordion-section name="A" label="Object and Fields Selection">
+                <lightning-combobox
+                    name="object"
+                    label="Status"
+                    value={selectedbject}
+                    placeholder="Select Object"
+                    options={objectList}
+                    onchange={handleObjectChange} ></lightning-combobox>
+
+                <lightning-dual-listbox name="languages"
+                    label="Select Fields"
+                    class="slds-m-top_medium"
+                    source-label="Available"
+                    selected-label="Selected"
+                    field-level-help="Select Fields"
+                    options={fieldsList}
+                    value={values}
+                    onchange={handleFieldsChange}></lightning-dual-listbox>
+
+                    <br />
+                <lightning-button variant="brand" label="Fetch Records" disabled={disableProcessBtn} onclick={fetchRecords} ></lightning-button>
+            </lightning-accordion-section>
+            <lightning-accordion-section name="B" label="Records Listview">
+                <div style="display:flow-root;">
+                    <div style="float:left">
+                        <lightning-combobox
+                            name="object"
+                            variant="label-hidden"
+                            disabled={disableCombobox}
+                            value={recordSize}
+                            placeholder="Record Size"
+                            options={getRecordSizeList}
+                            onchange={handleRecordSizeChange} ></lightning-combobox>
+                    </div>
+                    <div style="float:right">
+                        <lightning-button variant="brand" label="First" disabled={disablePreviousButtons} class="slds-m-top_medium" onclick={handleNavigation} ></lightning-button> &nbsp;
+                        <lightning-button variant="brand" label="Previous" disabled={disablePreviousButtons} class="slds-m-top_medium" onclick={handleNavigation} ></lightning-button> &nbsp;
+                        <lightning-button variant="brand" label="Next" disabled={disableNextButtons} class="slds-m-top_medium" onclick={handleNavigation} ></lightning-button> &nbsp;
+                        <lightning-button variant="brand" label="Last" disabled={disableNextButtons} class="slds-m-top_medium" onclick={handleNavigation} ></lightning-button>
+                    </div>
+                </div>
+                <br />
+                <div>
+                    <lightning-datatable
+                        key-field="id"
+                        hide-checkbox-column=true
+                        data={displayRecords}
+                        columns={columns}>
+                    </lightning-datatable>
+                </div>
+                <br />
+                <div style="text-align:right;">
+                    {recordViewMessage}
+                </div>
+            </lightning-accordion-section>
+        </lightning-accordion>
+    </div>
+</template>
