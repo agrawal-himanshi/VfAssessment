@@ -9,7 +9,7 @@
             <lightning-accordion-section name="A" label="Object and Fields Selection">
                 <lightning-combobox
                     name="object"
-                    label="Status"
+                    label="Select Object"
                     value={selectedbject}
                     placeholder="Select Object"
                     options={objectList}
@@ -26,11 +26,40 @@
                     onchange={handleFieldsChange}></lightning-dual-listbox>
 
                     <br />
-                <lightning-button variant="brand" label="Fetch Records" disabled={disableProcessBtn} onclick={fetchRecords} ></lightning-button>
+                <lightning-button class="slds-align_absolute-center" variant="brand" label="Fetch Records" disabled={disableProcessBtn} onclick={fetchRecords} ></lightning-button>
             </lightning-accordion-section>
+
             <lightning-accordion-section name="B" label="Records Listview">
                 <div style="display:flow-root;">
                     <div style="float:left">
+                        <span class="slds-truncate slds-m-left_small">{selectedObject}</span>
+                    </div>
+                    <div style="float: right;">
+                        <lightning-input  
+                            name="enter-search"
+                            type="input"
+                            value={searchName}
+                            disabled={searchItem}
+                            placeholder="search"
+                            onkeyup={handleKeyUp}
+                        ></lightning-input>
+                    </div>
+                </div>
+                <div>
+                    <lightning-datatable
+                        key-field="id"
+                        data={displayRecords}
+                        columns={columns}
+                        selected-rows={selectedRows}
+                        onrowselection={handleRowSelection}
+                        sorted-by={sortBy}
+                        sorted-direction={sortingDirection}
+                        onsort={doSorting}>
+                    </lightning-datatable>
+                </div>
+                <br />
+                <div class="slds-grid">
+                    <div class="slds-m-top--medium">
                         <lightning-combobox
                             name="object"
                             variant="label-hidden"
@@ -40,25 +69,16 @@
                             options={getRecordSizeList}
                             onchange={handleRecordSizeChange} ></lightning-combobox>
                     </div>
-                    <div style="float:right">
+                    <div class="slds-m-top_xxx-small slds-align--absolute-center">
                         <lightning-button variant="brand" label="First" disabled={disablePreviousButtons} class="slds-m-top_medium" onclick={handleNavigation} ></lightning-button> &nbsp;
-                        <lightning-button variant="brand" label="Previous" disabled={disablePreviousButtons} class="slds-m-top_medium" onclick={handleNavigation} ></lightning-button> &nbsp;
-                        <lightning-button variant="brand" label="Next" disabled={disableNextButtons} class="slds-m-top_medium" onclick={handleNavigation} ></lightning-button> &nbsp;
-                        <lightning-button variant="brand" label="Last" disabled={disableNextButtons} class="slds-m-top_medium" onclick={handleNavigation} ></lightning-button>
+                        <template for:each={paginationButtons} for:item="pageBtn">
+                            <lightning-button key={pageBtn.page} label={pageBtn.page} disabled={pageBtn.isDisabled} onclick={handlePageChange} variant={pageBtn.variant} class="slds-m-top_medium slds-m-left_xx-small"></lightning-button>
+                        </template>
+                        <lightning-button variant="brand" label="Last" disabled={disableNextButtons} class="slds-m-top_medium slds-m-left_xx-small" onclick={handleNavigation} ></lightning-button> &nbsp;
                     </div>
-                </div>
-                <br />
-                <div>
-                    <lightning-datatable
-                        key-field="id"
-                        hide-checkbox-column=true
-                        data={displayRecords}
-                        columns={columns}>
-                    </lightning-datatable>
-                </div>
-                <br />
-                <div style="text-align:right;">
-                    {recordViewMessage}
+                    <div class="slds-m-top--large">
+                        {recordViewMessage}
+                    </div>
                 </div>
             </lightning-accordion-section>
         </lightning-accordion>

@@ -39,7 +39,7 @@ public with sharing class ClientSidePaginationController {
     public static List<sObject> fetchRecords(String objectName, List<String> fieldsList) {
         try {
             if(String.isNotBlank(objectName) && fieldsList != null){
-                String query = 'SELECT id, ' + String.join(fieldsList, ',') + ' FROM '+objectName + ' LIMIT 50000';
+                String query = 'SELECT id, ' + String.join(fieldsList, ',') + ' FROM '+ objectName + ' LIMIT 50000';
                 return Database.query(query);
             }
             return null;
@@ -58,13 +58,9 @@ public with sharing class ClientSidePaginationController {
             this.datatype = datatype;
         }
         
-        public Integer compareTo(Object ObjToCompare) {
-            return label.CompareTo(((PicklistOptions)ObjToCompare).label);
+        public Integer compareTo(Object objToCompare) {
+            return label.CompareTo(((PicklistOptions)objToCompare).label);
         }
-    }
-
-    public class ReturnWrapper {
-        @AuraEnabled public List<sObject> records;
     }
 
     public static Map<String, String> apexTypetoJSType = new Map<String, String> {
