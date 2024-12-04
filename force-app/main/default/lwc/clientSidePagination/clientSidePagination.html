@@ -31,9 +31,6 @@
 
             <lightning-accordion-section name="B" label="Records Listview">
                 <div style="display:flow-root;">
-                    <div style="float:left">
-                        <span class="slds-truncate slds-m-left_small">{selectedObject}</span>
-                    </div>
                     <div style="float: right;">
                         <lightning-input  
                             name="enter-search"
@@ -47,14 +44,16 @@
                 </div>
                 <div>
                     <lightning-datatable
-                        key-field="id"
-                        data={displayRecords}
+                        data-id="datatable"
+                        key-field="Id"
                         columns={columns}
+                        data={displayRecords}
+                        sorted-direction={sortingDirection}
+                        sorted-by={sortBy}
                         selected-rows={selectedRows}
                         onrowselection={handleRowSelection}
-                        sorted-by={sortBy}
-                        sorted-direction={sortingDirection}
-                        onsort={doSorting}>
+                        onsort={doSorting}
+                        min-column-width="120px">
                     </lightning-datatable>
                 </div>
                 <br />

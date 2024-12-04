@@ -24,9 +24,8 @@ export default class ClientSidePagination extends LightningElement {
     @track paginationButtons = [];
     searchName = '';
     searchItem = false;
-    @track selectedRows = [];
+    selectedRows = [];
 
-    
     constructor() {
         super();
         this.showSpinner = true;
@@ -41,6 +40,8 @@ export default class ClientSidePagination extends LightningElement {
     }
 
     handleObjectChange(event) {
+        console.log(event);
+        
         this.selectedFields = [];
         this.values = [];
         this.showSpinner = true;
@@ -71,6 +72,7 @@ export default class ClientSidePagination extends LightningElement {
     }
 
     handleNavigation(event){
+        this.showSpinner = true;
         let buttonName = event.target.label;
         if(buttonName == 'First') {
             this.pageNumber = 1;
@@ -78,9 +80,11 @@ export default class ClientSidePagination extends LightningElement {
             this.pageNumber = this.totalPages;
         }
         this.processRecords();
+        this.showSpinner = false;
     }
 
     handlePageChange(event) {
+        this.showSpinner = true;
         let selectedPage = parseInt(event.target.label);
         if (!isNaN(selectedPage)) {
             this.pageNumber = selectedPage;
@@ -88,13 +92,16 @@ export default class ClientSidePagination extends LightningElement {
             this.endIndex = this.startIndex + parseInt(this.pageNumber);
             this.processRecords();
         }   
+        this.showSpinner = false;
     }
 
     handleRecordSizeChange(event) {
+        this.showSpinner = true;
         this.recordSize = event.detail.value;
         this.pageNumber = 1;
         this.totalPages = Math.ceil(this.totalRecords / Number(this.recordSize));
         this.processRecords();
+        this.showSpinner = false;
     }
 
     get disablePreviousButtons() {
@@ -117,16 +124,21 @@ export default class ClientSidePagination extends LightningElement {
     }
 
     processRecords() {
+        console.log('processRecords start');
         var uiRecords = [];
         var startLoop = ((this.pageNumber - 1) * Number(this.recordSize));
         var endLoop =  (this.pageNumber * Number(this.recordSize) >= this.totalRecords) ? this.totalRecords : this.pageNumber * Number(this.recordSize);
-        for(var i = startLoop; i < endLoop; i++) {
-            uiRecords.push(JSON.parse(JSON.stringify(filteredRecords[i])));
+        for (var i = startLoop; i < endLoop; i++) {
+            uiRecords.push(JSON.parse(JSON.stringify(this.records[i])));
         }
-        this.displayRecords = JSON.parse(JSON.stringify(uiRecords));
-        this.generatePaginationButtons();
+        this.displayRecords = JSON.parse(JSON.stringify(uiRecords)); // Update the displayRecords
+        this.template.querySelector('[data-id="datatable"]').selectedRows = this.selectedRows;
+        console.log('generatePaginationButtons start');
+        this.generatePaginationButtons(); // Recalculate pagination buttons
+        console.log('generatePaginationButtons end');
+        console.log('processRecords stop');
     }
-
+   
     fetchRecords(event) {
         this.showSpinner = true;
         fetchRecords({
@@ -159,12 +171,14 @@ export default class ClientSidePagination extends LightningElement {
                     columnList.push({'label': fieldsColumn[j].label, 'fieldName': fieldsColumn[j].value, 'type': fieldsColumn[j].datatype, 'sortable': true});
                 }
                 this.columns = columnList;
-                this.isNameField = result.nameField;
-                    if (this.isNameField) {
-                        this.searchItem = false;
-                    } else {
-                        this.searchItem = true;
-                    }
+
+                this.isNameField = this.records[0] && Object.keys(this.records[0]).find(field => field.toLowerCase().includes('name')) || null;
+                console.log(this.isNameField);
+                if (this.isNameField) {
+                    this.searchItem = false;
+                } else {
+                    this.searchItem = true;
+                }
             }
             const accordion = this.template.querySelector('.pagination-accordion');
             accordion.activeSectionName = 'B';
@@ -182,7 +196,6 @@ export default class ClientSidePagination extends LightningElement {
         this.paginationButtons = [];
         let startPage = this.pageNumber - 2;
         let endPage = this.pageNumber + 2;
-
         for (let i = startPage; i <= endPage; i++) {
             if (i >= 1 && i <= this.totalPages) {
                 let button = {
@@ -201,35 +214,72 @@ export default class ClientSidePagination extends LightningElement {
             }
         }
         this.paginationButtons[2].variant = 'brand';
-        if (!(this.data.length > 0)) {
+        if (!(this.records.length > 0)) {
             this.paginationButtons[2].page = 1;
             this.paginationButtons[2].isDisabled = true;
         }
-        console.log(this.paginationButtons);
-        
     }
 
     handleKeyUp(event) {
         const searchTerm = event.target.value.toLowerCase();
+        console.log(searchTerm);
         if (searchTerm) {
-            this.filteredRecords = this.records.filter(record => 
+            this.displayRecords = this.records.filter(record => 
                 record[this.isNameField] && 
-                record[this.isNameField].toLowerCase().includes(searchTerm)
+                record[this.isNameField].toLowerCase().startsWith(searchTerm)
             );
         } else {
-            this.filteredRecords = this.records;
+            this.displayRecords = [...this.records];
         }
-        this.totalRecords = this.filteredRecords.length;
-        this.totalPages = Math.ceil(this.totalRecords / Number(this.recordSize));
-        this.pageNumber = 1; // Reset to first page
-        this.processRecords();
+        this.totalRecords = this.displayRecords.length; // Update totalRecords to match filtered data
+        this.totalPages = Math.ceil(this.totalRecords / Number(this.recordSize)); // Recalculate total pages
+        this.pageNumber = 1; // Reset to the first page after filtering
+        this.processSearchRecords();
     }
-    
+
+    processSearchRecords(){
+        var uiRecords = [];
+        var startLoop = ((this.pageNumber - 1) * Number(this.recordSize));
+        var endLoop =  (this.pageNumber * Number(this.recordSize) >= this.totalRecords) ? this.totalRecords : this.pageNumber * Number(this.recordSize);
+        for (var i = startLoop; i < endLoop; i++) {
+            uiRecords.push(JSON.parse(JSON.stringify(this.displayRecords[i])));
+        }
+        this.displayRecords = JSON.parse(JSON.stringify(uiRecords)); // Update the displayRecords
+        this.template.querySelector('[data-id="datatable"]').selectedRows = this.selectedRows;
+        this.generatePaginationButtons();
+    }
 
     handleRowSelection(event) {
-        const selectedRowss = event.detail.selectedRows;
-        this.selectedRows = selectedRowss;
-        console.log('Selected rows:', this.selectedRows);
+        console.log('selectedRows called');
+        let updatedItemsSet = new Set();
+        // List of selected items we maintain.
+        let selectedItemsSet = new Set(this.selectedRows);
+        console.log('previously selected items:' + this.selectedRows);
+        // List of items currently loaded for the current view.
+        let loadedItemsSet = new Set();
+        this.displayRecords.map((ele) => {
+            loadedItemsSet.add(ele.Id);
+        });
+        if (event.detail.selectedRows) {
+            event.detail.selectedRows.map((ele) => {
+                updatedItemsSet.add(ele.Id);
+            });
+            // Add any new items to the selectedRows list
+            updatedItemsSet.forEach((Id) => {
+                if (!selectedItemsSet.has(Id)) {
+                    selectedItemsSet.add(Id);
+                }
+            });
+        }
+        loadedItemsSet.forEach((Id) => {
+            if (selectedItemsSet.has(Id) && !updatedItemsSet.has(Id)) {
+                // Remove any items that were unselected.
+                selectedItemsSet.delete(Id);
+            }
+        });
+        this.selectedRows = [...selectedItemsSet];
+        console.log('selectedRows==> ' + JSON.stringify(this.selectedRows));
+        console.log('selectedRows end');
     }
 
     doSorting(event) {
@@ -248,7 +298,6 @@ export default class ClientSidePagination extends LightningElement {
         console.log('direction: ' + direction);
         console.log('this.displayRecords before sorting: ' + JSON.stringify(this.records));
         let isReverse = direction === 'asc' ? 1 : -1; 
-        
         this.records.sort((x, y) => {
             let xValue = x[fieldname] || ''; 
             let yValue = y[fieldname] || '';
@@ -256,9 +305,8 @@ export default class ClientSidePagination extends LightningElement {
             yValue = yValue.toLowerCase();
             if (xValue < yValue) return -isReverse;
             if (xValue > yValue) return isReverse;
-            return 0; 
+            return 0; // No change if values are equal
         });
-        
         console.log('this.displayRecords after sorting: ' + JSON.stringify(this.displayRecords));
     }
     
