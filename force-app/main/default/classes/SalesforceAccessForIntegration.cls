@@ -14,5 +14,4 @@ global class SalesforceAccessForIntegration {
         return acc;
     }
 
-
 }
