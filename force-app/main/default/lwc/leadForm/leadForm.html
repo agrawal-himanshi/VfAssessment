@@ -1,0 +1,22 @@
+<template>
+    <lightning-card title="Create Lead and Associate with Campaign" class="slds-align_absolute-center slds-m-top-large">
+        <div class="slds-p-horizontal_medium slds-m-around--xx-large">
+            <!-- Form Fields -->
+            <lightning-input label="First Name" value={firstName} onchange={handleChange} data-id="firstName"></lightning-input>
+            <lightning-input label="Last Name" value={lastName} onchange={handleChange} data-id="lastName"></lightning-input>
+            <lightning-input label="Email" value={email} onchange={handleChange} data-id="email"></lightning-input>
+            <lightning-input label="Phone" value={phone} onchange={handleChange} data-id="phone"></lightning-input>
+            <lightning-input label="Company" value={company} onchange={handleChange} data-id="company"></lightning-input>
+
+            <!-- Submit Button -->
+            <lightning-button variant="brand" label="Create Lead and Campaign Member" onclick={handleSubmit}></lightning-button>
+        </div>
+    </lightning-card>
+
+    <!-- Show success or error messages -->
+    <template if:true={message}>
+        <div class="slds-box slds-box_xx-small slds-text-color_success">
+            {message}
+        </div>
+    </template>
+</template>

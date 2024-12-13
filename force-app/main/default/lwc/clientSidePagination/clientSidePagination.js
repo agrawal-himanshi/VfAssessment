@@ -19,7 +19,7 @@ export default class ClientSidePagination extends LightningElement {
     @track columns;
     @track values;
     @track showSpinner;
-    @track sortBy;
+    sortBy;
     @track sortingDirection;
     @track paginationButtons = [];
     searchName = '';
@@ -192,6 +192,7 @@ export default class ClientSidePagination extends LightningElement {
         })
     }
 
+    // 
     generatePaginationButtons() {
         this.paginationButtons = [];
         let startPage = this.pageNumber - 2;
