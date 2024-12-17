@@ -14,14 +14,21 @@ public with sharing class LeadController {
             );
             insert newLead;
 
-            // Step 2: Create CampaignMember
+            Campaign newCampaign = new Campaign(
+                Name = '' + newLead.LastName + ' Test Campaign',
+                StartDate = System.today(),
+                Status = 'Planned'
+            );
+            insert newCampaign;
+
+            // Step 3: Create CampaignMember to link the Lead to the Campaign
             CampaignMember newCampaignMember = new CampaignMember(
                 LeadId = newLead.Id,
-                CampaignId = '701dL00000gP8F7QAK'
+                CampaignId = newCampaign.Id
             );
             insert newCampaignMember;
 
-            return newCampaignMember.Id;
+            return newCampaign.Id;
 
         } catch (Exception e) {
             return 'Error: ' + e.getMessage();

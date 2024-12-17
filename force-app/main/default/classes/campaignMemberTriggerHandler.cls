@@ -1,33 +1,29 @@
 public class campaignMemberTriggerHandler extends TriggerHandler {
 
+    // Override the afterInsert method for Campaign trigger
     public override void afterInsert() {
-        List<CampaignMember> campaignMembersToUpdate = new List<CampaignMember>();
+        List<Campaign> campaignsToUpdate = new List<Campaign>();
 
-        for (CampaignMember campMember : (List<CampaignMember>) Trigger.new) {
-            try {
-                String campaignId = campMember.CampaignId;
-                if (String.isNotBlank(campaignId)) {
-                    String encryptedCampaignId = encryptCampaignId(campaignId);
+        // Loop through the inserted Campaign records
+        for (Campaign campaign : (List<Campaign>) Trigger.new) {
+            String campaignId = campaign.Id;
 
-                    // Create updated CampaignMember with the encrypted field
-                    CampaignMember updatedMember = new CampaignMember(
-                        Id = campMember.Id, 
-                        Encrypted_Campaign_Id__c = encryptedCampaignId
-                    );
+            if (String.isNotBlank(campaignId)) {
+                // Encrypt the CampaignId
+                String encryptedCampaignId = encryptCampaignId(campaignId);
 
-                    // Add to the list of records to be updated
-                    campaignMembersToUpdate.add(updatedMember);
-                }
-            } catch (Exception e) {
-                System.debug('Error encrypting CampaignId: ' + e.getMessage());
+                Campaign updatedCampaign = new Campaign(
+                    Id = campaign.Id,  
+                    Encrypt_Campaign_Id__c = encryptedCampaignId
+                );
+                campaignsToUpdate.add(updatedCampaign);
             }
         }
 
-        // Update the records with the encrypted CampaignId
-        if (!campaignMembersToUpdate.isEmpty()) {
-            update campaignMembersToUpdate;
+        // Update the Campaign records with the encrypted CampaignId
+        if (!campaignsToUpdate.isEmpty()) {
+            update campaignsToUpdate;
         }
-
     }
 
     // Method to encrypt the CampaignId using MD5 and return the base64 encoded value
@@ -36,8 +32,8 @@ public class campaignMemberTriggerHandler extends TriggerHandler {
         Blob hash = Crypto.generateDigest('MD5', targetBlob);
         return EncodingUtil.base64Encode(hash);
     }
-
 }
+
 
 
 
